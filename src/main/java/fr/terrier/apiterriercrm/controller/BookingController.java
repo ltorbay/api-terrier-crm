@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/public/booking")
+@RequestMapping("/public/bookings")
 public class BookingController {
+    // TODO filter logging
     @PostMapping
     public BookingResponse book(@Valid @RequestBody BookingRequest request) {
         return new BookingResponse().period(request.period());

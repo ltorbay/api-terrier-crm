@@ -1,9 +1,22 @@
 spring:
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/terrier
     username: user
     password: password
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
+  jackson:
+    date-format: YYYY-MM-DD
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+  mvc:
+    converters:
+      preferred-json-mapper: jackson
+  
+schedulers:
+  datasource:
+    pool-size: 100
+    queue-task-cap: 500
     

@@ -1,0 +1,65 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+    <changeSet id="202205092242" author="lto">
+        <comment>Create user and booking tables</comment>
+        <createTable tableName="User">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="firstName" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lastName" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phoneNumber" type="varchar(255)"/>
+            <column name="birthDate" type="date"/>
+        </createTable>
+        <createTable tableName="Booking">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" validateForeignKey="true"/>
+            </column>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="guestsCount" type="int"/>
+            <column name="comment" type="mediumtext"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="Booking" 
+                                 baseColumnNames="user_id" 
+                                 constraintName="fk_Booking_User" 
+                                 referencedTableName="User"
+                                 referencedColumnNames="id"/>
+        <createIndex tableName="Booking" indexName="Booking_start">
+            <column name="start" type="date"/>
+        </createIndex>
+        <createIndex tableName="Booking" indexName="Booking_end">
+            <column name="end" type="date"/>
+        </createIndex>
+        <createIndex tableName="User" indexName="User_email">
+            <column name="email" type="varchar(255)"/>
+        </createIndex>
+        <createIndex tableName="User" indexName="User_birthdate">
+            <column name="birthDate" type="date"/>
+        </createIndex>
+        <createIndex tableName="User" indexName="User_name">
+            <column name="firstName" type="date"/>
+            <column name="lastName" type="date"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

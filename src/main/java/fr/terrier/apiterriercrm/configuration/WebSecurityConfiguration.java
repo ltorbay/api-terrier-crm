@@ -22,6 +22,7 @@ public class WebSecurityConfiguration {
     }
 
     @Bean
+    // TODO implement security from users stored in database
     public MapReactiveUserDetailsService userDetailsService() {
         return new MapReactiveUserDetailsService(User.builder()
                                                      .username("username")

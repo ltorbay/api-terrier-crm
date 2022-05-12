@@ -5,11 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
-public class UserData {
+public class User {
     @NotBlank
     private String firstName;
     @NotBlank
@@ -18,5 +18,5 @@ public class UserData {
     @NotBlank
     private String email;
     private String phoneNumber;
-    private Date birthDate;
+    private LocalDate birthDate;
 }

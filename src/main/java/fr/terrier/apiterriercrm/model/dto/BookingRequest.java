@@ -13,8 +13,8 @@ public class BookingRequest {
     private BookingPeriod period;
     @Valid
     @NotNull
-    private UserData userData;
+    private User user;
     @Valid
     @NotNull
-    private BookingInformation bookingInformation;
+    private BookingInformation information;
 }
