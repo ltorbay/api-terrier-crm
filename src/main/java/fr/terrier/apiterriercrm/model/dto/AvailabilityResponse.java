@@ -9,7 +9,7 @@ import java.util.TreeSet;
 
 @Getter
 @Setter
-public class ReservationsResponse {
+public class AvailabilityResponse {
     @JsonProperty
     private TreeSet<LocalDate> pear;
     @JsonProperty

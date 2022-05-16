@@ -1,7 +1,7 @@
 package fr.terrier.apiterriercrm.mapper;
 
-import fr.terrier.apiterriercrm.model.dto.ReservationsResponse;
-import fr.terrier.apiterriercrm.model.entity.ReservationView;
+import fr.terrier.apiterriercrm.model.dto.AvailabilityResponse;
+import fr.terrier.apiterriercrm.model.entity.AvailabilityView;
 import fr.terrier.apiterriercrm.model.enums.BookingType;
 import org.springframework.stereotype.Service;
 
@@ -11,13 +11,12 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Service
-public class ReservationMapper {
-    public ReservationsResponse map(final Set<ReservationView> reservationViews) {
+public class AvailabilityMapper {
+    public AvailabilityResponse map(final Set<AvailabilityView> availabilityViews) {
         TreeSet<LocalDate> pear = new TreeSet<>();
         TreeSet<LocalDate> grapes = new TreeSet<>();
 
-        // TODO could this be done in sql directly via the projection ?
-        reservationViews.forEach(projection -> {
+        availabilityViews.forEach(projection -> {
             var dates = projection.getStart()
                                   .datesUntil(projection.getEnd())
                                   .collect(Collectors.toUnmodifiableSet());
@@ -28,7 +27,7 @@ public class ReservationMapper {
                 grapes.addAll(dates);
             }
         });
-        return new ReservationsResponse()
+        return new AvailabilityResponse()
                 .pear(pear)
                 .grapes(grapes);
     }

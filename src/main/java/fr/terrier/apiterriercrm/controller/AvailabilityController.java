@@ -1,9 +1,7 @@
 package fr.terrier.apiterriercrm.controller;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import fr.terrier.apiterriercrm.mapper.ReservationMapper;
-import fr.terrier.apiterriercrm.model.dto.ReservationsResponse;
+import fr.terrier.apiterriercrm.mapper.AvailabilityMapper;
+import fr.terrier.apiterriercrm.model.dto.AvailabilityResponse;
 import fr.terrier.apiterriercrm.repository.BookingRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -18,20 +16,20 @@ import reactor.core.scheduler.Scheduler;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/public/reservations")
+@RequestMapping("/public/availabilities")
 @RequiredArgsConstructor
-public class ReservationController {
+public class AvailabilityController {
     @Qualifier("datasourceScheduler")
     private final Scheduler datasourceScheduler;
     private final BookingRepository bookingRepository;
-    private final ReservationMapper reservationMapper;
+    private final AvailabilityMapper availabilityMapper;
 
     @GetMapping
-    public Mono<ReservationsResponse> getReservations(@RequestParam @NotNull @JsonDeserialize(using = LocalDateDeserializer.class) final LocalDate start, 
-                                                      @RequestParam @NotNull @JsonDeserialize(using = LocalDateDeserializer.class) final LocalDate end) {
+    public Mono<AvailabilityResponse> getAvailability(@RequestParam @NotNull final LocalDate start,
+                                                      @RequestParam @NotNull final LocalDate end) {
         // noinspection BlockingMethodInNonBlockingContext
         return Mono.fromCallable(() -> bookingRepository.findByPeriodBetween(start, end))
-                   .map(reservationMapper::map)
+                   .map(availabilityMapper::map)
                    .subscribeOn(datasourceScheduler);
     }
 }

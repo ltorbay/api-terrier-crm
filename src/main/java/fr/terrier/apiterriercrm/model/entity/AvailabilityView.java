@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDate;
 
-public interface ReservationView {
+public interface AvailabilityView {
     BookingType getType();
 
     @Value("#{target.period.start}")
