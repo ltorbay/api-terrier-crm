@@ -8,9 +8,11 @@ import java.time.LocalDate;
 public interface AvailabilityView {
     BookingType getType();
 
+    @SuppressWarnings("SpringElInspection")
     @Value("#{target.period.start}")
     LocalDate getStart();
 
+    @SuppressWarnings("SpringElInspection")
     @Value("#{target.period.end}")
     LocalDate getEnd();
 }

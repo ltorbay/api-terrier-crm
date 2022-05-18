@@ -19,4 +19,9 @@ schedulers:
   datasource:
     pool-size: 100
     queue-task-cap: 500
-    
+
+payments.square:
+  access-token: my-access-token
+  environment: SANDBOX
+  currency: EUR
+  
