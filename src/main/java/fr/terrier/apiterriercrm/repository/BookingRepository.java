@@ -1,7 +1,7 @@
 package fr.terrier.apiterriercrm.repository;
 
 import fr.terrier.apiterriercrm.model.entity.AvailabilityView;
-import fr.terrier.apiterriercrm.model.entity.BookingEntity;
+import fr.terrier.apiterriercrm.model.entity.booking.BookingEntity;
 import fr.terrier.apiterriercrm.model.enums.BookingStatus;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;

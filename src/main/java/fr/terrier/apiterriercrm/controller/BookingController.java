@@ -3,7 +3,7 @@ package fr.terrier.apiterriercrm.controller;
 import fr.terrier.apiterriercrm.model.dto.BookingPeriod;
 import fr.terrier.apiterriercrm.model.dto.BookingRequest;
 import fr.terrier.apiterriercrm.model.dto.BookingResponse;
-import fr.terrier.apiterriercrm.model.dto.PriceDetail;
+import fr.terrier.apiterriercrm.model.dto.PricingDetail;
 import fr.terrier.apiterriercrm.model.enums.BookingType;
 import fr.terrier.apiterriercrm.service.BookingService;
 import fr.terrier.apiterriercrm.service.PricingService;
@@ -32,8 +32,8 @@ public class BookingController {
     }
 
     @GetMapping
-    public Mono<PriceDetail> getPriceDetail(@NotNull @Valid @ModelAttribute BookingType type,
-                                            @NotNull @Valid @ModelAttribute BookingPeriod period) {
+    public Mono<PricingDetail> getPriceDetail(@NotNull @Valid @ModelAttribute BookingType type,
+                                              @NotNull @Valid @ModelAttribute BookingPeriod period) {
         return pricingService.getBookingPriceDetail(type, period);
     }
 }

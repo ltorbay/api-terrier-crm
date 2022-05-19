@@ -21,12 +21,28 @@
             <column name="phoneNumber" type="varchar(255)"/>
             <column name="birthDate" type="date"/>
         </createTable>
+        <createIndex tableName="User" indexName="User_email">
+            <column name="email" type="varchar(255)"/>
+        </createIndex>
+        <createIndex tableName="User" indexName="User_birthdate">
+            <column name="birthDate" type="date"/>
+        </createIndex>
+        <createIndex tableName="User" indexName="User_name">
+            <column name="firstName" type="date"/>
+            <column name="lastName" type="date"/>
+        </createIndex>
         <createTable tableName="Booking">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
             <column name="user_id" type="bigint">
                 <constraints nullable="false" validateForeignKey="true"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idempotencyKey" type="varchar(36)">
+                <constraints nullable="false"/>
             </column>
             <column name="type" type="varchar(255)">
                 <constraints nullable="false"/>
@@ -51,15 +67,57 @@
         <createIndex tableName="Booking" indexName="Booking_end">
             <column name="end" type="date"/>
         </createIndex>
-        <createIndex tableName="User" indexName="User_email">
-            <column name="email" type="varchar(255)"/>
+    </changeSet>
+    <changeSet id="202205192020" author="lto">
+        <comment>Create BookingPricingDetail and PeriodConfiguration tables</comment>
+        <createTable tableName="BookingPricingDetail">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="booking_id" type="bigint">
+                <constraints nullable="false" validateForeignKey="true"/>
+            </column>
+            <column name="configuration_start" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="configuration_pricing_both" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="configuration_pricing_grapes" type="bigint"/>
+            <column name="configuration_pricing_pear" type="bigint"/>
+            <column name="start" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end" type="date">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="BookingPricingDetail"
+                                 baseColumnNames="booking_id"
+                                 constraintName="fk_BookingPricingDetail_Booking"
+                                 referencedTableName="Booking"
+                                 referencedColumnNames="id"/>
+        <createIndex tableName="BookingPricingDetail" indexName="BookingPricingDetail_booking_id">
+            <column name="booking_id" type="bigint"/>
         </createIndex>
-        <createIndex tableName="User" indexName="User_birthdate">
-            <column name="birthDate" type="date"/>
-        </createIndex>
-        <createIndex tableName="User" indexName="User_name">
-            <column name="firstName" type="date"/>
-            <column name="lastName" type="date"/>
+        <createTable tableName="PeriodConfiguration">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="minConsecutiveDays" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pricing_both" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pricing_grapes" type="bigint"/>
+            <column name="pricing_pear" type="bigint"/>
+        </createTable>
+        <createIndex tableName="PeriodConfiguration" indexName="PeriodConfiguration_start">
+            <column name="start" type="date"/>
         </createIndex>
     </changeSet>
 </databaseChangeLog>

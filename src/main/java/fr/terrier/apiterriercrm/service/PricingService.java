@@ -3,7 +3,7 @@ package fr.terrier.apiterriercrm.service;
 import fr.terrier.apiterriercrm.mapper.PeriodConfigurationMapper;
 import fr.terrier.apiterriercrm.model.dto.BookingPeriod;
 import fr.terrier.apiterriercrm.model.dto.PeriodConfiguration;
-import fr.terrier.apiterriercrm.model.dto.PriceDetail;
+import fr.terrier.apiterriercrm.model.dto.PricingDetail;
 import fr.terrier.apiterriercrm.model.enums.BookingType;
 import fr.terrier.apiterriercrm.model.exception.ResponseException;
 import fr.terrier.apiterriercrm.repository.PeriodConfigurationRepository;
@@ -44,10 +44,10 @@ public class PricingService {
                 .map(detail -> detail.totalCents(type));
     }
 
-    public Mono<PriceDetail> getBookingPriceDetail(final BookingType type, final BookingPeriod period) {
+    public Mono<PricingDetail> getBookingPriceDetail(final BookingType type, final BookingPeriod period) {
         return getPricingPattern(period.start(), period.end())
                 .handle((PeriodConfiguration periodConfiguration, SynchronousSink<PeriodConfiguration> sink) -> {
-                    var rate = periodConfiguration.period().rate(type);
+                    var rate = periodConfiguration.pricing().rate(type);
                     if (rate == null) {
                         sink.error(new ResponseException(HttpStatus.BAD_REQUEST,
                                                          String.format("Period %s cannot be booked fo type %s. No matching rate exist in configuration", period, type)));
@@ -70,7 +70,7 @@ public class PricingService {
                                  detailedPricing.put(configurations.get(i), new BookingPeriod(previous.get(), end));
                                  previous.set(end.plusDays(1L));
                              });
-                    return new PriceDetail(detailedPricing);
+                    return new PricingDetail(detailedPricing);
                 });
     }
 }

@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Getter
 @AllArgsConstructor
-public class PriceDetail {
+public class PricingDetail {
     // TODO include additional fees if applicable
     @JsonProperty
     Map<PeriodConfiguration, BookingPeriod> periods;
@@ -22,7 +22,7 @@ public class PriceDetail {
                       .stream()
                       .mapToLong(entry -> {
                           var paidDays = entry.getValue().consecutiveDays() - 1L;
-                          var rate = Optional.ofNullable(entry.getKey().period().rate(type))
+                          var rate = Optional.ofNullable(entry.getKey().pricing().rate(type))
                                              .orElseThrow(() -> new InternalServerException("Missing expected rate with type %s for pricing calculation on entry %s", type, entry));
                           return paidDays * rate;
                       })

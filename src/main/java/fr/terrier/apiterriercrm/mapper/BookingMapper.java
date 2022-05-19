@@ -1,7 +1,7 @@
 package fr.terrier.apiterriercrm.mapper;
 
 import fr.terrier.apiterriercrm.model.dto.BookingResponse;
-import fr.terrier.apiterriercrm.model.entity.BookingEntity;
+import fr.terrier.apiterriercrm.model.entity.booking.BookingEntity;
 import org.mapstruct.Mapper;
 
 @Mapper

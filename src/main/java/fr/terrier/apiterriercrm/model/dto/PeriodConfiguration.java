@@ -20,6 +20,6 @@ public class PeriodConfiguration {
     @Valid
     @NotNull
     @Embedded.Empty
-    private PricingConfiguration period;
+    private PricingConfiguration pricing;
 
 }

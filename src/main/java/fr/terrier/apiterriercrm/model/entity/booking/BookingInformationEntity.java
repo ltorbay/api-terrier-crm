@@ -1,4 +1,4 @@
-package fr.terrier.apiterriercrm.model.entity;
+package fr.terrier.apiterriercrm.model.entity.booking;
 
 import jakarta.validation.constraints.Size;
 import lombok.Getter;

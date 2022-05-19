@@ -15,9 +15,9 @@ public class PricingConfigurationEntity {
      */
     @NotNull
     @Positive
-    private Integer both;
+    private Long both;
     @Positive
-    private Integer grapes;
+    private Long grapes;
     @Positive
-    private Integer pear;
+    private Long pear;
 }

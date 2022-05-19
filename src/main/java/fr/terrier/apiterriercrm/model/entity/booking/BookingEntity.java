@@ -1,5 +1,6 @@
-package fr.terrier.apiterriercrm.model.entity;
+package fr.terrier.apiterriercrm.model.entity.booking;
 
+import fr.terrier.apiterriercrm.model.entity.UserEntity;
 import fr.terrier.apiterriercrm.model.enums.BookingStatus;
 import fr.terrier.apiterriercrm.model.enums.BookingType;
 import jakarta.validation.Valid;
@@ -20,7 +21,13 @@ import java.util.UUID;
 public class BookingEntity {
     @Id
     private Long id;
-    
+
+    @Valid
+    @NotNull
+    @Setter(AccessLevel.NONE)
+    private Long userId;
+
+    @NotNull
     private BookingStatus status = BookingStatus.CREATED;
 
     @NotNull
@@ -38,11 +45,6 @@ public class BookingEntity {
     @NotNull
     @Embedded.Empty
     private BookingInformationEntity information;
-
-    @Valid
-    @NotNull
-    @Setter(AccessLevel.NONE)
-    private Long userId;
 
     public BookingEntity user(UserEntity user) {
         Assert.notNull(user.id(), () -> "User id cannot be null for booking");
