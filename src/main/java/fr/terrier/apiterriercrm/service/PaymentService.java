@@ -20,6 +20,7 @@ public class PaymentService {
 
     public Mono<CreatePaymentResponse> createPayment(final PaymentRequest paymentRequest) {
         // TODO handle errors
+        // TODO test
         return Mono.fromFuture(squareClient.getPaymentsApi()
                                            // TODO missing properties
                                            .createPaymentAsync(new CreatePaymentRequest.Builder(paymentRequest.sourceId(), 

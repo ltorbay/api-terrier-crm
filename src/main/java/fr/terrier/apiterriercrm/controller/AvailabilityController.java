@@ -19,10 +19,10 @@ import java.time.LocalDate;
 @RequestMapping("/public/availabilities")
 @RequiredArgsConstructor
 public class AvailabilityController {
+    private final AvailabilityMapper availabilityMapper;
+    private final BookingRepository bookingRepository;
     @Qualifier("datasourceScheduler")
     private final Scheduler datasourceScheduler;
-    private final BookingRepository bookingRepository;
-    private final AvailabilityMapper availabilityMapper;
 
     @GetMapping
     public Mono<AvailabilityResponse> getAvailability(@RequestParam @NotNull final LocalDate start,

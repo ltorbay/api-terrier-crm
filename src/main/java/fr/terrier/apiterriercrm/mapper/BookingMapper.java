@@ -6,7 +6,8 @@ import org.mapstruct.Mapper;
 
 @Mapper
 public interface BookingMapper {
-    BookingResponse map(final BookingEntity bookingEntity);
+    BookingResponse map(final BookingEntity entity);
 
-    BookingEntity map(final BookingResponse bookingResponse);
+    // TODO unmapped target configuration (should fail on unmapped!) and required annotation
+    BookingEntity map(final BookingResponse dto);
 }

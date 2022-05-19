@@ -14,9 +14,9 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+    private final UserRepository userRepository;
     @Qualifier("datasourceScheduler")
     private final Scheduler datasourceScheduler;
-    private final UserRepository userRepository;
 
     public Mono<UserEntity> createOrGet(User user) {
         // noinspection BlockingMethodInNonBlockingContext
