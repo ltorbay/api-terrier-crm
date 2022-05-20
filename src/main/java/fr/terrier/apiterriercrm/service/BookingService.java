@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 import reactor.core.scheduler.Scheduler;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -46,9 +47,11 @@ public class BookingService {
     public Mono<BookingResponse> book(@Valid @RequestBody BookingRequest bookingRequest) {
         // TODO map and handle booking errors to ResponseException
         // TODO check that period is not already booked (availability service ?)
-        return pricingService.getBookingPriceDetail(bookingRequest.getType(), bookingRequest.getPeriod())
-                             .handle((PricingDetail pricingDetail, SynchronousSink<PaymentRequest> sink) -> {
-                                 var amount = pricingDetail.totalCents(bookingRequest.getType());
+        return pricingService.getBookingPriceDetails(bookingRequest.getType(), bookingRequest.getPeriod())
+                             .handle((List<PricingDetail> pricingDetails, SynchronousSink<PaymentRequest> sink) -> {
+                                 var amount = pricingDetails.stream()
+                                                            .mapToLong(detail -> detail.totalCents(bookingRequest.getType()))
+                                                            .sum();
                                  if (!Objects.equals(amount, bookingRequest.getInformation().getPaymentAmountCents())) {
                                      sink.error(new ResponseException(HttpStatus.BAD_REQUEST, "Calculated booking amount %d and amount sent by client %d do not match", amount, bookingRequest.getInformation().getPaymentAmountCents()));
                                  } else {
@@ -56,7 +59,7 @@ public class BookingService {
                                                              .idempotencyKey(UUID.randomUUID())
                                                              .sourceId(bookingRequest.getInformation().getPaymentSourceId())
                                                              .amount(amount)
-                                                             .detail(pricingDetail)
+                                                             .details(pricingDetails)
                                                              .build());
                                  }
                              })
@@ -75,7 +78,7 @@ public class BookingService {
                                                                                                    .userId(userEntity.getId())
                                                                                                    .build())
                                                                    .map(bookingRepository::save)
-                                                                   .flatMap(bookingEntity -> persistPricingDetails(bookingEntity, paymentRequest.getDetail()).thenReturn(bookingEntity))
+                                                                   .flatMap(bookingEntity -> persistPricingDetails(bookingEntity, paymentRequest.getDetails()).thenReturn(bookingEntity))
                                                                    .subscribeOn(datasourceScheduler)
                                                                    .flatMap(bookingEntity -> paymentService.createPayment(paymentRequest, bookingRequest.getUser().getEmail(), bookingEntity.getUserId())
                                                                                                            .flatMap(paymentResponse -> completeBooking(bookingEntity.getId(), paymentResponse.getPayment().getId()).thenReturn(bookingEntity))
@@ -84,17 +87,15 @@ public class BookingService {
                              .map(bookingMapper::map);
     }
 
-    private Mono<Iterable<BookingPricingDetailEntity>> persistPricingDetails(final BookingEntity bookingEntity, final PricingDetail pricingDetail) {
+    private Mono<Iterable<BookingPricingDetailEntity>> persistPricingDetails(final BookingEntity bookingEntity, final List<PricingDetail> pricingDetails) {
         // noinspection BlockingMethodInNonBlockingContext
-        return Mono.fromCallable(() -> pricingDetail.getPeriods()
-                                                    .keySet()
-                                                    .stream()
-                                                    .map(bookingPeriod -> BookingPricingDetailEntity.builder()
-                                                                                                    .bookingId(bookingEntity.getId())
-                                                                                                    .bookingPeriod(bookingEntity.getPeriod())
-                                                                                                    .periodConfiguration(bookingPeriodMapper.map(bookingPeriod))
-                                                                                                    .build())
-                                                    .toList())
+        return Mono.fromCallable(() -> pricingDetails.stream()
+                                                     .map(detail -> BookingPricingDetailEntity.builder()
+                                                                                              .bookingId(bookingEntity.getId())
+                                                                                              .bookingPeriod(bookingEntity.getPeriod())
+                                                                                              .periodConfiguration(bookingPeriodMapper.map(detail.getPeriodConfiguration()))
+                                                                                              .build())
+                                                     .toList())
                    .flatMap(details -> Mono.fromCallable(() -> bookingPricingDetailRepository.saveAll(details))
                                            .subscribeOn(datasourceScheduler));
     }

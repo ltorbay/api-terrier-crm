@@ -17,9 +17,9 @@ import reactor.core.publisher.SynchronousSink;
 import reactor.core.scheduler.Scheduler;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
@@ -40,7 +40,7 @@ public class PricingService {
                    .map(periodConfigurationMapper::map);
     }
 
-    public Mono<PricingDetail> getBookingPriceDetail(final BookingType type, final BookingPeriod period) {
+    public Mono<List<PricingDetail>> getBookingPriceDetails(final BookingType type, final BookingPeriod period) {
         return getPricingPattern(period.getStart(), period.getEnd())
                 .handle((PeriodConfiguration periodConfiguration, SynchronousSink<PeriodConfiguration> sink) -> {
                     if (periodConfiguration.getPricing().getNightlyRate(type) == null) {
@@ -59,15 +59,15 @@ public class PricingService {
                 })
                 .collectSortedList(Comparator.comparing(PeriodConfiguration::getStart))
                 .map(configurations -> {
-                    Map<PeriodConfiguration, BookingPeriod> detailedPricing = new HashMap<>();
+                    var details = new ArrayList<PricingDetail>();
                     var previous = new AtomicReference<>(period.getStart());
                     IntStream.range(0, configurations.size())
                              .forEach(i -> {
                                  var end = i + 1 >= configurations.size() ? period.getEnd() : configurations.get(i + 1).getStart().minusDays(1L);
-                                 detailedPricing.put(configurations.get(i), new BookingPeriod(previous.get(), end));
+                                 details.add(new PricingDetail(configurations.get(i), new BookingPeriod(previous.get(), end)));
                                  previous.set(end.plusDays(1L));
                              });
-                    return new PricingDetail(detailedPricing);
+                    return details;
                 });
     }
 }

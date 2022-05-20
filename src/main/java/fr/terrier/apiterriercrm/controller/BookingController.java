@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/public/bookings")
 @RequiredArgsConstructor
@@ -32,8 +34,8 @@ public class BookingController {
     }
 
     @GetMapping
-    public Mono<PricingDetail> getPriceDetail(@NotNull @Valid @ModelAttribute BookingType type,
-                                              @NotNull @Valid @ModelAttribute BookingPeriod period) {
-        return pricingService.getBookingPriceDetail(type, period);
+    public Mono<List<PricingDetail>> getPriceDetail(@NotNull @Valid @ModelAttribute BookingType type,
+                                                    @NotNull @Valid @ModelAttribute BookingPeriod period) {
+        return pricingService.getBookingPriceDetails(type, period);
     }
 }

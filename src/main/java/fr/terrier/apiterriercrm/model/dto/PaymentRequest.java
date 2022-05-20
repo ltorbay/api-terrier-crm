@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -18,7 +19,7 @@ public class PaymentRequest {
     private Long amount;
     
     @NonNull
-    private PricingDetail detail;
+    private List<PricingDetail> details;
     
     @NotBlank
     private String sourceId;
