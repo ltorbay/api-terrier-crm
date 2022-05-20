@@ -3,6 +3,7 @@ package fr.terrier.apiterriercrm.model.entity.booking;
 import fr.terrier.apiterriercrm.model.entity.BasePeriodConfigurationEntity;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -11,6 +12,7 @@ import org.springframework.data.relational.core.mapping.Embedded;
 
 @Getter
 @Setter
+@Builder
 @Persistent
 public class BookingPricingDetailEntity {
     @Id

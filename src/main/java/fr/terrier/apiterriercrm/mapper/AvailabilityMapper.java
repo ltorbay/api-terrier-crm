@@ -27,8 +27,9 @@ public class AvailabilityMapper {
                 grapes.addAll(dates);
             }
         });
-        return new AvailabilityResponse()
-                .pear(pear)
-                .grapes(grapes);
+        return AvailabilityResponse.builder()
+                                   .pear(pear)
+                                   .grapes(grapes)
+                                   .build();
     }
 }

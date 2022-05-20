@@ -39,34 +39,29 @@ public class PricingService {
                    .map(periodConfigurationMapper::map);
     }
 
-    public Mono<Long> computeAmountCents(final BookingType type, final BookingPeriod period) {
-        return getBookingPriceDetail(type, period)
-                .map(detail -> detail.totalCents(type));
-    }
-
     public Mono<PricingDetail> getBookingPriceDetail(final BookingType type, final BookingPeriod period) {
-        return getPricingPattern(period.start(), period.end())
+        return getPricingPattern(period.getStart(), period.getEnd())
                 .handle((PeriodConfiguration periodConfiguration, SynchronousSink<PeriodConfiguration> sink) -> {
-                    var rate = periodConfiguration.pricing().rate(type);
+                    var rate = periodConfiguration.getPricing().getRate(type);
                     if (rate == null) {
                         sink.error(new ResponseException(HttpStatus.BAD_REQUEST,
                                                          String.format("Period %s cannot be booked fo type %s. No matching rate exist in configuration", period, type)));
                     }
 
                     var consecutiveDays = period.consecutiveDays();
-                    if (consecutiveDays < periodConfiguration.minConsecutiveDays()) {
+                    if (consecutiveDays < periodConfiguration.getMinConsecutiveDays()) {
                         sink.error(new ResponseException(HttpStatus.BAD_REQUEST,
                                                          String.format("Period %s cannot be booked fo type %s. Minimal consecutive days requirement not met", period, type)));
                     }
                     sink.next(periodConfiguration);
                 })
-                .collectSortedList(Comparator.comparing(PeriodConfiguration::start))
+                .collectSortedList(Comparator.comparing(PeriodConfiguration::getStart))
                 .map(configurations -> {
                     Map<PeriodConfiguration, BookingPeriod> detailedPricing = new HashMap<>();
-                    var previous = new AtomicReference<>(period.start());
+                    var previous = new AtomicReference<>(period.getStart());
                     IntStream.range(0, configurations.size())
                              .forEach(i -> {
-                                 var end = i + 1 >= configurations.size() ? period.end() : configurations.get(i + 1).start().minusDays(1L);
+                                 var end = i + 1 >= configurations.size() ? period.getEnd() : configurations.get(i + 1).getStart().minusDays(1L);
                                  detailedPricing.put(configurations.get(i), new BookingPeriod(previous.get(), end));
                                  previous.set(end.plusDays(1L));
                              });

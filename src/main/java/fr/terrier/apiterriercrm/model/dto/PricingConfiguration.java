@@ -18,11 +18,11 @@ public class PricingConfiguration {
     @Positive
     private Long pear;
 
-    public @Nullable Long rate(BookingType type) {
+    public @Nullable Long getRate(BookingType type) {
         return switch (type) {
-            case BOTH -> both();
-            case GRAPES -> grapes();
-            case PEAR -> pear();
+            case BOTH -> both;
+            case GRAPES -> grapes;
+            case PEAR -> pear;
         };
     }
 }

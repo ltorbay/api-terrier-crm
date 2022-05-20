@@ -1,13 +1,19 @@
 package fr.terrier.apiterriercrm.service;
 
+import fr.terrier.apiterriercrm.mapper.BookingMapper;
 import fr.terrier.apiterriercrm.model.dto.BookingRequest;
 import fr.terrier.apiterriercrm.model.dto.BookingResponse;
 import fr.terrier.apiterriercrm.model.dto.PaymentRequest;
+import fr.terrier.apiterriercrm.model.dto.PricingDetail;
+import fr.terrier.apiterriercrm.model.entity.BasePeriodConfigurationEntity;
+import fr.terrier.apiterriercrm.model.entity.PricingConfigurationEntity;
 import fr.terrier.apiterriercrm.model.entity.booking.BookingEntity;
 import fr.terrier.apiterriercrm.model.entity.booking.BookingInformationEntity;
 import fr.terrier.apiterriercrm.model.entity.booking.BookingPeriodEntity;
+import fr.terrier.apiterriercrm.model.entity.booking.BookingPricingDetailEntity;
 import fr.terrier.apiterriercrm.model.enums.BookingStatus;
 import fr.terrier.apiterriercrm.model.exception.ResponseException;
+import fr.terrier.apiterriercrm.repository.BookingPricingDetailRepository;
 import fr.terrier.apiterriercrm.repository.BookingRepository;
 import jakarta.validation.Valid;
 import lombok.NonNull;
@@ -24,6 +30,7 @@ import reactor.core.scheduler.Scheduler;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -32,38 +39,71 @@ public class BookingService {
     private final PaymentService paymentService;
     private final UserService userService;
     private final PricingService pricingService;
+    private final BookingMapper bookingMapper;
     private final BookingRepository bookingRepository;
+    private final BookingPricingDetailRepository bookingPricingDetailRepository;
     @Qualifier("datasourceScheduler")
     private final Scheduler datasourceScheduler;
 
     public Mono<BookingResponse> book(@Valid @RequestBody BookingRequest request) {
         // TODO map and handle booking errors to ResponseException
-        return pricingService.computeAmountCents(request.type(), request.period())
-                             .handle((Long amount, SynchronousSink<PaymentRequest> sink) -> {
-                                 if (!Objects.equals(amount, request.information().paymentAmountCents())) {
+        return pricingService.getBookingPriceDetail(request.getType(), request.getPeriod())
+                             .handle((PricingDetail pricingDetail, SynchronousSink<PaymentRequest> sink) -> {
+                                 var amount = pricingDetail.totalCents(request.getType());
+                                 if (!Objects.equals(amount, request.getInformation().getPaymentAmountCents())) {
                                      sink.error(new ResponseException(HttpStatus.BAD_REQUEST, "Calculated booking amount and amount sent by client do not match"));
                                  }
-                                 sink.next(new PaymentRequest().idempotencyKey(UUID.randomUUID())
-                                                               .sourceId(request.information().paymentSourceId())
-                                                               .amount(amount));
+                                 sink.next(PaymentRequest.builder()
+                                                         .idempotencyKey(UUID.randomUUID())
+                                                         .sourceId(request.getInformation().getPaymentSourceId())
+                                                         .amount(amount)
+                                                         .detail(pricingDetail)
+                                                         .build());
                              })
-                             .flatMap(paymentRequest -> userService.createOrGet(request.user())
-                                                                   .map(userEntity -> new BookingEntity().period(new BookingPeriodEntity()
-                                                                                                                         .start(request.period().start())
-                                                                                                                         .end(request.period().end()))
-                                                                                                         .information(new BookingInformationEntity().comment(request.information().comment())
-                                                                                                                                                    .guestsCount(request.information().guestsCount()))
-                                                                                                         .type(request.type())
-                                                                                                         .idempotencyKey(paymentRequest.idempotencyKey())
-                                                                                                         .user(userEntity))
+                             .flatMap(paymentRequest -> userService.createOrGet(request.getUser())
+                                                                   .map(userEntity -> BookingEntity.builder()
+                                                                                                   .period(BookingPeriodEntity.builder()
+                                                                                                                              .start(request.getPeriod().getStart())
+                                                                                                                              .end(request.getPeriod().getEnd())
+                                                                                                                              .build())
+                                                                                                   .information(BookingInformationEntity.builder()
+                                                                                                                                        .comment(request.getInformation().getComment())
+                                                                                                                                        .guestsCount(request.getInformation().getGuestsCount())
+                                                                                                                                        .build())
+                                                                                                   .type(request.getType())
+                                                                                                   .idempotencyKey(paymentRequest.getIdempotencyKey())
+                                                                                                   .userId(userEntity.getId())
+                                                                                                   .build())
                                                                    .map(bookingRepository::save)
+                                                                   .flatMap(bookingEntity -> persistPricingDetails(bookingEntity, paymentRequest.getDetail()).thenReturn(bookingEntity))
                                                                    .subscribeOn(datasourceScheduler)
                                                                    .flatMap(booking -> paymentService.createPayment(paymentRequest)
-                                                                                                     // TODO update the created payment to next status ? (squareClient.completePayment())
-                                                                                                     .flatMap(paymentResponse -> completeBooking(booking.id(), paymentResponse.getPayment().getId()))
+                                                                                                     // TODO update the created payment to next status ? (squareClient.completePayment()) -> check square workflows
+                                                                                                     .flatMap(paymentResponse -> completeBooking(booking.getId(), paymentResponse.getPayment().getId()))
                                                                                                      .doOnError(e -> log.error("Error while creating payment for booking completion", e))
                                                                                                      .onErrorResume(e -> abortBooking(request))))
-                             .map(paymentResponse -> new BookingResponse().period(request.period()));
+                             .map(bookingMapper::map);
+    }
+
+    private Mono<Iterable<BookingPricingDetailEntity>> persistPricingDetails(final BookingEntity bookingEntity, final PricingDetail pricingDetail) {
+        // noinspection BlockingMethodInNonBlockingContext
+        return Mono.fromCallable(() -> pricingDetail.getPeriods()
+                                                    .keySet()
+                                                    .stream()
+                                                    .map(bookingPeriod -> BookingPricingDetailEntity.builder()
+                                                                                                    .bookingId(bookingEntity.getId())
+                                                                                                    .bookingPeriod(bookingEntity.getPeriod())
+                                                                                                    .periodConfiguration(BasePeriodConfigurationEntity.builder()
+                                                                                                                                                      .pricing(PricingConfigurationEntity.builder()
+                                                                                                                                                                                         .both(bookingPeriod.getPricing().getBoth())
+                                                                                                                                                                                         .grapes(bookingPeriod.getPricing().getGrapes())
+                                                                                                                                                                                         .pear(bookingPeriod.getPricing().getPear())
+                                                                                                                                                                                         .build())
+                                                                                                                                                      .build())
+                                                                                                    .build())
+                                                    .collect(Collectors.toList()))
+                   .flatMap(details -> Mono.fromCallable(() -> bookingPricingDetailRepository.saveAll(details))
+                                           .subscribeOn(datasourceScheduler));
     }
 
     private Mono<BookingEntity> completeBooking(final Long bookingId, @NonNull final String paymentId) {
@@ -76,8 +116,9 @@ public class BookingService {
     }
 
     private Mono<BookingEntity> abortBooking(final BookingRequest bookingRequest) {
-        // TODO return ResponseException ?
-        return Mono.just(new BookingEntity());
+        // TODO return ResponseException after abort ?
+        // TODO implement abort
+        return Mono.just(bookingMapper.map(bookingRequest));
     }
 }
 

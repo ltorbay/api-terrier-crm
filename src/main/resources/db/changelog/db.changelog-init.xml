@@ -38,6 +38,7 @@
             <column name="user_id" type="bigint">
                 <constraints nullable="false" validateForeignKey="true"/>
             </column>
+            <column name="payment_id" type="varchar(255)"/>
             <column name="status" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>

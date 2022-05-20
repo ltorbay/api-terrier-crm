@@ -23,9 +23,9 @@ public class PaymentService {
         // TODO test
         return Mono.fromFuture(squareClient.getPaymentsApi()
                                            // TODO missing properties
-                                           .createPaymentAsync(new CreatePaymentRequest.Builder(paymentRequest.sourceId(), 
-                                                                                                paymentRequest.idempotencyKey().toString(), 
-                                                                                                new Money(paymentRequest.amount(), paymentProperties.getCurrency()))
+                                           .createPaymentAsync(new CreatePaymentRequest.Builder(paymentRequest.getSourceId(), 
+                                                                                                paymentRequest.getIdempotencyKey().toString(), 
+                                                                                                new Money(paymentRequest.getAmount(), paymentProperties.getCurrency()))
                                                                        .build()));
     }
 }

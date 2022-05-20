@@ -22,7 +22,7 @@ public class PricingDetail {
                       .stream()
                       .mapToLong(entry -> {
                           var paidDays = entry.getValue().consecutiveDays() - 1L;
-                          var rate = Optional.ofNullable(entry.getKey().pricing().rate(type))
+                          var rate = Optional.ofNullable(entry.getKey().getPricing().getRate(type))
                                              .orElseThrow(() -> new InternalServerException("Missing expected rate with type %s for pricing calculation on entry %s", type, entry));
                           return paidDays * rate;
                       })

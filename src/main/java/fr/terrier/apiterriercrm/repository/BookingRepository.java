@@ -17,7 +17,7 @@ import java.util.Set;
 public interface BookingRepository extends CrudRepository<BookingEntity, Long> {
 
     @Modifying
-    @Query("update Booking set status = :status, paymentId = :paymentId where id = :id")
+    @Query("update Booking set status = :status, payment_id = :paymentId where id = :id")
     Optional<BookingEntity> persistBookingPayment(@Param("newStatus") BookingStatus newStatus,
                                                   @Param("paymentId") String paymentId,
                                                   @Param("id") Long id);

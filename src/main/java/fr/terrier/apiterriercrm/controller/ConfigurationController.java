@@ -26,6 +26,6 @@ public class ConfigurationController {
     public Mono<SortedSet<PeriodConfiguration>> getPricingConfiguration(@RequestParam @NotNull final LocalDate start,
                                                                         @RequestParam @NotNull final LocalDate end) {
         return pricingService.getPricingPattern(start, end)
-                             .collect(() -> new TreeSet<PeriodConfiguration>(Comparator.comparing(PeriodConfiguration::start)), Set::add);
+                             .collect(() -> new TreeSet<PeriodConfiguration>(Comparator.comparing(PeriodConfiguration::getStart)), Set::add);
     }
 }

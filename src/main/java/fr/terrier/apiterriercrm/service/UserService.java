@@ -20,15 +20,17 @@ public class UserService {
 
     public Mono<UserEntity> createOrGet(User user) {
         // noinspection BlockingMethodInNonBlockingContext
-        return Mono.fromCallable(() -> userRepository.findByEmail(user.email()))
+        return Mono.fromCallable(() -> userRepository.findByEmail(user.getEmail()))
                    .subscribeOn(datasourceScheduler)
                    .filter(Optional::isPresent)
                    .map(Optional::get)
-                   .switchIfEmpty(Mono.fromCallable(() -> userRepository.save(new UserEntity().firstName(user.firstName())
-                                                                                              .lastName(user.lastName())
-                                                                                              .email(user.email())
-                                                                                              .birthDate(user.birthDate())
-                                                                                              .phoneNumber(user.phoneNumber()))))
+                   .switchIfEmpty(Mono.fromCallable(() -> userRepository.save(UserEntity.builder()
+                                                                                        .firstName(user.getFirstName())
+                                                                                        .lastName(user.getLastName())
+                                                                                        .email(user.getEmail())
+                                                                                        .birthDate(user.getBirthDate())
+                                                                                        .phoneNumber(user.getPhoneNumber())
+                                                                                        .build())))
                    .subscribeOn(datasourceScheduler);
     }
 }
