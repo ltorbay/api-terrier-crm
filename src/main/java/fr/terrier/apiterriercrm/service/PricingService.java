@@ -42,16 +42,18 @@ public class PricingService {
     public Mono<PricingDetail> getBookingPriceDetail(final BookingType type, final BookingPeriod period) {
         return getPricingPattern(period.getStart(), period.getEnd())
                 .handle((PeriodConfiguration periodConfiguration, SynchronousSink<PeriodConfiguration> sink) -> {
-                    var rate = periodConfiguration.getPricing().getRate(type);
+                    var rate = periodConfiguration.getPricing().getDailyRate(type);
                     if (rate == null) {
                         sink.error(new ResponseException(HttpStatus.BAD_REQUEST,
                                                          String.format("Period %s cannot be booked fo type %s. No matching rate exist in configuration", period, type)));
+                        return;
                     }
 
                     var consecutiveDays = period.consecutiveDays();
                     if (consecutiveDays < periodConfiguration.getMinConsecutiveDays()) {
                         sink.error(new ResponseException(HttpStatus.BAD_REQUEST,
                                                          String.format("Period %s cannot be booked fo type %s. Minimal consecutive days requirement not met", period, type)));
+                        return;
                     }
                     sink.next(periodConfiguration);
                 })

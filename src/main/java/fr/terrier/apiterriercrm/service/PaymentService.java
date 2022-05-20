@@ -10,22 +10,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
     private final SquareClient squareClient;
     private final PaymentProperties paymentProperties;
 
-    public Mono<CreatePaymentResponse> createPayment(final PaymentRequest paymentRequest) {
+    public Mono<CreatePaymentResponse> createPayment(final PaymentRequest paymentRequest, final String buyerEmail, final Long userId) {
         // TODO handle errors
         // TODO test
         return Mono.fromFuture(squareClient.getPaymentsApi()
-                                           // TODO missing properties
                                            .createPaymentAsync(new CreatePaymentRequest.Builder(paymentRequest.getSourceId(), 
                                                                                                 paymentRequest.getIdempotencyKey().toString(), 
                                                                                                 new Money(paymentRequest.getAmount(), paymentProperties.getCurrency()))
+                                                                       .buyerEmailAddress(buyerEmail)
+                                                                       .customerId(userId.toString())
                                                                        .build()));
     }
 }

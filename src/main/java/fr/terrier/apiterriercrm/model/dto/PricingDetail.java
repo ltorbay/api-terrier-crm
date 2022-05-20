@@ -21,8 +21,9 @@ public class PricingDetail {
         return periods.entrySet()
                       .stream()
                       .mapToLong(entry -> {
+                          // TODO make calculations with full week price for saturday->saturday (selected day in properties for full week) !!
                           var paidDays = entry.getValue().consecutiveDays() - 1L;
-                          var rate = Optional.ofNullable(entry.getKey().getPricing().getRate(type))
+                          var rate = Optional.ofNullable(entry.getKey().getPricing().getDailyRate(type))
                                              .orElseThrow(() -> new InternalServerException("Missing expected rate with type %s for pricing calculation on entry %s", type, entry));
                           return paidDays * rate;
                       })

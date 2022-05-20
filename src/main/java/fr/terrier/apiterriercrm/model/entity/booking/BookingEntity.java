@@ -4,12 +4,21 @@ import fr.terrier.apiterriercrm.model.enums.BookingStatus;
 import fr.terrier.apiterriercrm.model.enums.BookingType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
+import org.springframework.data.annotation.AccessType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Persistent;
+import org.springframework.data.convert.PropertyValueConverter;
+import org.springframework.data.convert.ValueConversionContext;
+import org.springframework.data.convert.ValueConverter;
+import org.springframework.data.mapping.PersistentProperty;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Embedded;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.UUID;
 
@@ -17,6 +26,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Persistent
+@Table("Booking")
 public class BookingEntity {
     @Id
     private Long id;
@@ -30,7 +40,8 @@ public class BookingEntity {
     private BookingStatus status = BookingStatus.CREATED;
 
     @NotNull
-    private UUID idempotencyKey;
+    @Column
+    private String idempotencyKey;
 
     @NotNull
     private BookingType type;

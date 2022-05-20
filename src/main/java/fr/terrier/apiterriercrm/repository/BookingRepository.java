@@ -17,10 +17,10 @@ import java.util.Set;
 public interface BookingRepository extends CrudRepository<BookingEntity, Long> {
 
     @Modifying
-    @Query("update Booking set status = :status, payment_id = :paymentId where id = :id")
-    Optional<BookingEntity> persistBookingPayment(@Param("newStatus") BookingStatus newStatus,
-                                                  @Param("paymentId") String paymentId,
-                                                  @Param("id") Long id);
+    @Query("update Booking set status = :newStatus, payment_id = :paymentId where id = :id")
+    Boolean persistBookingPayment(@Param("newStatus") BookingStatus newStatus,
+                                  @Param("paymentId") String paymentId,
+                                  @Param("id") Long id);
 
     @Query("select type, start, end from Booking where :start <= end and :end >= start")
     Set<AvailabilityView> findByPeriodBetween(@Param("start") LocalDate start,

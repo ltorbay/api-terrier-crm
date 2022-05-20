@@ -6,8 +6,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 public class ResponseException extends ResponseStatusException {
     // TODO add internal error codes so they can be mapped to user understandable messages
-    public ResponseException(HttpStatus status, String reason) {
-        super(status, reason);
+    public ResponseException(HttpStatus status, String reason, Object... args) {
+        super(status, String.format(reason, args));
     }
 
     public ResponseException(HttpStatus status, String reason, Throwable cause) {

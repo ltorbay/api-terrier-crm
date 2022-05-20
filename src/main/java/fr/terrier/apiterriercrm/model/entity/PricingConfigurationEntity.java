@@ -2,14 +2,13 @@ package fr.terrier.apiterriercrm.model.entity;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Persistent;
+import org.springframework.data.relational.core.mapping.Embedded;
 
 @Getter
 @Setter
-@Builder
 @Persistent
 public class PricingConfigurationEntity {
     /*
@@ -17,9 +16,24 @@ public class PricingConfigurationEntity {
      */
     @NotNull
     @Positive
-    private Long both;
+    @Embedded.Empty(prefix = "both_")
+    private PricingEntity both;
     @Positive
-    private Long grapes;
+    @Embedded.Empty(prefix = "grapes_")
+    private PricingEntity grapes;
     @Positive
-    private Long pear;
+    @Embedded.Empty(prefix = "pear_")
+    private PricingEntity pear;
+
+    @Getter
+    @Setter
+    @Persistent
+    public static class PricingEntity {
+        @NotNull
+        @Positive
+        private Long nightly;
+        @NotNull
+        @Positive
+        private Long weekly;
+    }
 }

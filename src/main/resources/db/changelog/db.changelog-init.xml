@@ -9,27 +9,29 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
-            <column name="firstName" type="varchar(255)">
+            <column name="first_name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="lastName" type="varchar(255)">
+            <column name="last_name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="email" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="phoneNumber" type="varchar(255)"/>
-            <column name="birthDate" type="date"/>
+            <column name="phone_number" type="varchar(255)"/>
+            <column name="birth_date" type="date"/>
         </createTable>
         <createIndex tableName="User" indexName="User_email">
             <column name="email" type="varchar(255)"/>
         </createIndex>
         <createIndex tableName="User" indexName="User_birthdate">
-            <column name="birthDate" type="date"/>
+            <column name="birth_date" type="date"/>
         </createIndex>
-        <createIndex tableName="User" indexName="User_name">
-            <column name="firstName" type="date"/>
-            <column name="lastName" type="date"/>
+        <createIndex tableName="User" indexName="User_first_name">
+            <column name="first_name" type="date"/>
+        </createIndex>
+        <createIndex tableName="User" indexName="User_last_name">
+            <column name="last_name" type="date"/>
         </createIndex>
         <createTable tableName="Booking">
             <column name="id" type="bigint" autoIncrement="true">
@@ -42,7 +44,7 @@
             <column name="status" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="idempotencyKey" type="varchar(36)">
+            <column name="idempotency_key" type="varchar(36)">
                 <constraints nullable="false"/>
             </column>
             <column name="type" type="varchar(255)">
@@ -54,12 +56,12 @@
             <column name="end" type="date">
                 <constraints nullable="false"/>
             </column>
-            <column name="guestsCount" type="int"/>
+            <column name="guests_count" type="int"/>
             <column name="comment" type="mediumtext"/>
         </createTable>
-        <addForeignKeyConstraint baseTableName="Booking" 
-                                 baseColumnNames="user_id" 
-                                 constraintName="fk_Booking_User" 
+        <addForeignKeyConstraint baseTableName="Booking"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_Booking_User"
                                  referencedTableName="User"
                                  referencedColumnNames="id"/>
         <createIndex tableName="Booking" indexName="Booking_start">
@@ -81,11 +83,16 @@
             <column name="configuration_start" type="date">
                 <constraints nullable="false"/>
             </column>
-            <column name="configuration_pricing_both" type="bigint">
+            <column name="configuration_pricing_both_nightly" type="bigint">
                 <constraints nullable="false"/>
             </column>
-            <column name="configuration_pricing_grapes" type="bigint"/>
-            <column name="configuration_pricing_pear" type="bigint"/>
+            <column name="configuration_pricing_grapes_nightly" type="bigint"/>
+            <column name="configuration_pricing_pear_nightly" type="bigint"/>
+            <column name="configuration_pricing_both_weekly" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="configuration_pricing_grapes_weekly" type="bigint"/>
+            <column name="configuration_pricing_pear_weekly" type="bigint"/>
             <column name="start" type="date">
                 <constraints nullable="false"/>
             </column>
@@ -105,20 +112,38 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
-            <column name="minConsecutiveDays" type="tinyint">
+            <column name="min_consecutive_days" type="tinyint">
                 <constraints nullable="false"/>
             </column>
             <column name="start" type="date">
                 <constraints nullable="false"/>
             </column>
-            <column name="pricing_both" type="bigint">
+            <column name="pricing_both_nightly" type="bigint">
                 <constraints nullable="false"/>
             </column>
-            <column name="pricing_grapes" type="bigint"/>
-            <column name="pricing_pear" type="bigint"/>
+            <column name="pricing_grapes_nightly" type="bigint"/>
+            <column name="pricing_pear_nightly" type="bigint"/>
+            <column name="pricing_both_weekly" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pricing_grapes_weekly" type="bigint"/>
+            <column name="pricing_pear_weekly" type="bigint"/>
         </createTable>
         <createIndex tableName="PeriodConfiguration" indexName="PeriodConfiguration_start">
             <column name="start" type="date"/>
         </createIndex>
+    </changeSet>
+    <changeSet id="202205201525" author="lto">
+        <comment>Insert default period configuration</comment>
+        <insert tableName="PeriodConfiguration">
+            <column name="min_consecutive_days" value="3"/>
+            <column name="start" value="1970-01-01"/>
+            <column name="pricing_both_weekly" value="400000"/>
+            <column name="pricing_both_nightly" value="60000"/>
+            <column name="pricing_grapes_weekly" value="200000"/>
+            <column name="pricing_grapes_nightly" value="30000"/>
+            <column name="pricing_pear_weekly" value="270000"/>
+            <column name="pricing_pear_nightly" value="40000"/>
+        </insert>
     </changeSet>
 </databaseChangeLog>

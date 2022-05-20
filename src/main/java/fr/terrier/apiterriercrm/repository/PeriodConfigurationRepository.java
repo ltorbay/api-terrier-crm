@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.TreeSet;
+import java.util.List;
 
 @Repository
 public interface PeriodConfigurationRepository extends CrudRepository<PeriodConfigurationEntity, Long> {
@@ -17,6 +17,6 @@ public interface PeriodConfigurationRepository extends CrudRepository<PeriodConf
             union all
             (select * from PeriodConfiguration where start > :start and start <= :end)
             """)
-    TreeSet<PeriodConfigurationEntity> findForPeriod(@Param("start") LocalDate start,
-                                                     @Param("end") LocalDate end);
+    List<PeriodConfigurationEntity> findForPeriod(@Param("start") LocalDate start,
+                                                  @Param("end") LocalDate end);
 }

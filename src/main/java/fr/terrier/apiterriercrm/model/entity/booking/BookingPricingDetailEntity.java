@@ -9,11 +9,13 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Persistent;
 import org.springframework.data.relational.core.mapping.Embedded;
+import org.springframework.data.relational.core.mapping.Table;
 
 @Getter
 @Setter
 @Builder
 @Persistent
+@Table("BookingPricingDetail")
 public class BookingPricingDetailEntity {
     @Id
     private Long id;

@@ -12,17 +12,28 @@ import org.springframework.lang.Nullable;
 public class PricingConfiguration {
     @NotNull
     @Positive
-    private Long both;
+    private Pricing both;
     @Positive
-    private Long grapes;
+    private Pricing grapes;
     @Positive
-    private Long pear;
+    private Pricing pear;
 
-    public @Nullable Long getRate(BookingType type) {
+    public @Nullable Long getDailyRate(BookingType type) {
         return switch (type) {
-            case BOTH -> both;
-            case GRAPES -> grapes;
-            case PEAR -> pear;
+            case BOTH -> both.nightly;
+            case GRAPES -> grapes.nightly;
+            case PEAR -> pear.nightly;
         };
+    }
+
+    @Getter
+    @Setter
+    public static class Pricing {
+        @NotNull
+        @Positive
+        private Long nightly;
+        @NotNull
+        @Positive
+        private Long weekly;
     }
 }
