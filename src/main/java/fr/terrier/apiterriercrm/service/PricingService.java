@@ -31,6 +31,7 @@ public class PricingService {
     @Qualifier("datasourceScheduler")
     private final Scheduler datasourceScheduler;
 
+    // TODO cache : https://www.baeldung.com/spring-webflux-cacheable
     public Flux<PeriodConfiguration> getPricingPattern(final LocalDate start, LocalDate end) {
         // noinspection BlockingMethodInNonBlockingContext
         return Mono.fromCallable(() -> periodConfigurationRepository.findForPeriod(start, end))
@@ -42,8 +43,7 @@ public class PricingService {
     public Mono<PricingDetail> getBookingPriceDetail(final BookingType type, final BookingPeriod period) {
         return getPricingPattern(period.getStart(), period.getEnd())
                 .handle((PeriodConfiguration periodConfiguration, SynchronousSink<PeriodConfiguration> sink) -> {
-                    var rate = periodConfiguration.getPricing().getDailyRate(type);
-                    if (rate == null) {
+                    if (periodConfiguration.getPricing().getNightlyRate(type) == null) {
                         sink.error(new ResponseException(HttpStatus.BAD_REQUEST,
                                                          String.format("Period %s cannot be booked fo type %s. No matching rate exist in configuration", period, type)));
                         return;

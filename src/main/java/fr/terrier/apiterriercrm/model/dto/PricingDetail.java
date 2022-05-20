@@ -12,20 +12,25 @@ import java.util.Optional;
 @Getter
 @AllArgsConstructor
 public class PricingDetail {
+    public static final int NIGHTS_IN_FULL_WEEK = 7;
+    
     // TODO include additional fees if applicable
     @JsonProperty
     Map<PeriodConfiguration, BookingPeriod> periods;
 
     @JsonProperty
+    // TODO unit tests
     public Long totalCents(BookingType type) {
         return periods.entrySet()
                       .stream()
                       .mapToLong(entry -> {
-                          // TODO make calculations with full week price for saturday->saturday (selected day in properties for full week) !!
-                          var paidDays = entry.getValue().consecutiveDays() - 1L;
-                          var rate = Optional.ofNullable(entry.getKey().getPricing().getDailyRate(type))
-                                             .orElseThrow(() -> new InternalServerException("Missing expected rate with type %s for pricing calculation on entry %s", type, entry));
-                          return paidDays * rate;
+                          var paidNights = entry.getValue().consecutiveDays() - 1L;
+                          var nightlyRate = Optional.ofNullable(entry.getKey().getPricing().getNightlyRate(type))
+                                                  .orElseThrow(() -> new InternalServerException("Missing expected rate with type %s for pricing calculation on entry %s", type, entry));
+                          var weeklyRate = Optional.ofNullable(entry.getKey().getPricing().getWeeklyRate(type))
+                                                   .orElseGet(() -> nightlyRate * NIGHTS_IN_FULL_WEEK);
+                          return nightlyRate * (paidNights % NIGHTS_IN_FULL_WEEK)
+                                  + weeklyRate * (paidNights / NIGHTS_IN_FULL_WEEK);
                       })
                       .sum();
     }

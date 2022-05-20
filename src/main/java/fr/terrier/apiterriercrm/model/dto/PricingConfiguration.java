@@ -18,11 +18,19 @@ public class PricingConfiguration {
     @Positive
     private Pricing pear;
 
-    public @Nullable Long getDailyRate(BookingType type) {
+    public @Nullable Long getNightlyRate(BookingType type) {
         return switch (type) {
             case BOTH -> both.nightly;
-            case GRAPES -> grapes.nightly;
-            case PEAR -> pear.nightly;
+            case GRAPES -> grapes == null ? null : grapes.nightly;
+            case PEAR -> pear == null ? null : pear.nightly;
+        };
+    }
+
+    public @Nullable Long getWeeklyRate(BookingType type) {
+        return switch (type) {
+            case BOTH -> both.weekly;
+            case GRAPES -> grapes == null ? null : grapes.weekly;
+            case PEAR -> pear == null ? null : pear.weekly;
         };
     }
 

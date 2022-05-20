@@ -10,16 +10,15 @@ import java.time.Period;
 
 @Getter
 @AllArgsConstructor
-public class BookingPeriod {
-
+public class LocalDatesPeriod {
     @NotNull
-    private LocalDate start;
+    protected LocalDate start;
     @NotNull
-    private LocalDate end;
+    protected LocalDate end;
 
     @AssertTrue
     @SuppressWarnings("unused")
-    private boolean valid() {
+    protected boolean valid() {
         return start.isBefore(end);
     }
 
