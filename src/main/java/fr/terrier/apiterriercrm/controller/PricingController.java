@@ -17,9 +17,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 @RestController
-@RequestMapping("/public/configuration")
+@RequestMapping("/public/pricing")
 @RequiredArgsConstructor
-public class ConfigurationController {
+public class PricingController {
     private final PricingService pricingService;
 
     @GetMapping

@@ -29,10 +29,8 @@ public class PricingConfigurationEntity {
     @Setter
     @Persistent
     public static class PricingEntity {
-        @NotNull
         @Positive
         private Long nightly;
-        @NotNull
         @Positive
         private Long weekly;
     }

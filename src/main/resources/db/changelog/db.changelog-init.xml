@@ -80,12 +80,13 @@
             <column name="booking_id" type="bigint">
                 <constraints nullable="false" validateForeignKey="true"/>
             </column>
+            <column name="configuration_period_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
             <column name="configuration_start" type="date">
                 <constraints nullable="false"/>
             </column>
-            <column name="configuration_pricing_both_nightly" type="bigint">
-                <constraints nullable="false"/>
-            </column>
+            <column name="configuration_pricing_both_nightly" type="bigint"/>
             <column name="configuration_pricing_grapes_nightly" type="bigint"/>
             <column name="configuration_pricing_pear_nightly" type="bigint"/>
             <column name="configuration_pricing_both_weekly" type="bigint">
@@ -112,6 +113,9 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
+            <column name="period_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
             <column name="min_consecutive_days" type="tinyint">
                 <constraints nullable="false"/>
             </column>
@@ -137,13 +141,14 @@
         <comment>Insert default period configuration</comment>
         <insert tableName="PeriodConfiguration">
             <column name="min_consecutive_days" value="3"/>
+            <column name="period_type" value="OFF_SEASON"/>
             <column name="start" value="1970-01-01"/>
-            <column name="pricing_both_weekly" value="400000"/>
-            <column name="pricing_both_nightly" value="60000"/>
-            <column name="pricing_grapes_weekly" value="200000"/>
-            <column name="pricing_grapes_nightly" value="30000"/>
-            <column name="pricing_pear_weekly" value="270000"/>
-            <column name="pricing_pear_nightly" value="40000"/>
+            <column name="pricing_both_weekly" value="200000"/>
+            <column name="pricing_both_nightly" value="30000"/>
+            <column name="pricing_grapes_weekly" value="100000"/>
+            <column name="pricing_grapes_nightly" value="15000"/>
+            <column name="pricing_pear_weekly" value="135000"/>
+            <column name="pricing_pear_nightly" value="20000"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

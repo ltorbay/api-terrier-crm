@@ -1,5 +1,6 @@
 package fr.terrier.apiterriercrm.model.entity;
 
+import fr.terrier.apiterriercrm.model.enums.PricingPeriodType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -13,6 +14,9 @@ import java.time.LocalDate;
 @Setter
 @Persistent
 public class BasePeriodConfigurationEntity {
+    @NotNull
+    private PricingPeriodType periodType;
+    
     @NotNull
     private LocalDate start;
 

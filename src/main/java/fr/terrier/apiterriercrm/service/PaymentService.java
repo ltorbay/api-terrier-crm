@@ -18,7 +18,6 @@ public class PaymentService {
 
     public Mono<CreatePaymentResponse> createPayment(final PaymentRequest paymentRequest, final String buyerEmail, final Long userId) {
         // TODO handle errors
-        // TODO test
         return Mono.fromFuture(squareClient.getPaymentsApi()
                                            .createPaymentAsync(new CreatePaymentRequest.Builder(paymentRequest.getSourceId(), 
                                                                                                 paymentRequest.getIdempotencyKey().toString(), 

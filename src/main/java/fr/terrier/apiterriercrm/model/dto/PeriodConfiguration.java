@@ -1,5 +1,6 @@
 package fr.terrier.apiterriercrm.model.dto;
 
+import fr.terrier.apiterriercrm.model.enums.PricingPeriodType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -12,11 +13,11 @@ import java.time.LocalDate;
 @Setter
 public class PeriodConfiguration {
     @NotNull
+    private PricingPeriodType periodType;
+    @NotNull
     private LocalDate start;
-
     @NotNull
     private Integer minConsecutiveDays;
-
     @Valid
     @NotNull
     @Embedded.Empty
