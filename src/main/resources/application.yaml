@@ -7,7 +7,7 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
   jackson:
-    date-format: YYYY-MM-DD
+    date-format: yyyy-MM-dd
     time-zone: UTC
     serialization:
       write-dates-as-timestamps: false

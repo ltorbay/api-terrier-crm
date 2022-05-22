@@ -3,7 +3,6 @@ package fr.terrier.apiterriercrm.configuration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.format.datetime.DateFormatterRegistrar;
 import org.springframework.lang.NonNull;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
@@ -20,7 +19,6 @@ public class WebFluxConfiguration implements WebFluxConfigurer {
 
     @Override
     public void addFormatters(FormatterRegistry registry) {
-        new DateFormatterRegistrar();
         registry.addFormatter(new Formatter<LocalDate>() {
             final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
 

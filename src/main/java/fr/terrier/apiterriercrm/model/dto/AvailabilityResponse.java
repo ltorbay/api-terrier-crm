@@ -1,5 +1,6 @@
 package fr.terrier.apiterriercrm.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,9 @@ import java.util.TreeSet;
 @Builder
 public class AvailabilityResponse {
     @JsonProperty
-    private TreeSet<LocalDate> pear;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private TreeSet<LocalDate> pearBookings;
     @JsonProperty
-    private TreeSet<LocalDate> grapes;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private TreeSet<LocalDate> grapesBookings;
 }

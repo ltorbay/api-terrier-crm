@@ -28,8 +28,8 @@ public class AvailabilityMapper {
             }
         });
         return AvailabilityResponse.builder()
-                                   .pear(pear)
-                                   .grapes(grapes)
+                                   .pearBookings(pear)
+                                   .grapesBookings(grapes)
                                    .build();
     }
 }

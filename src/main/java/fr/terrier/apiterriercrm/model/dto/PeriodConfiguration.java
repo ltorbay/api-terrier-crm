@@ -1,5 +1,6 @@
 package fr.terrier.apiterriercrm.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import fr.terrier.apiterriercrm.model.enums.PricingPeriodType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +16,7 @@ public class PeriodConfiguration {
     @NotNull
     private PricingPeriodType periodType;
     @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate start;
     @NotNull
     private Integer minConsecutiveDays;
