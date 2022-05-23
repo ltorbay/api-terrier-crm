@@ -1,7 +1,7 @@
 package fr.terrier.apiterriercrm.mapper;
 
-import fr.terrier.apiterriercrm.model.dto.AvailabilityResponse;
-import fr.terrier.apiterriercrm.model.entity.AvailabilityView;
+import fr.terrier.apiterriercrm.model.dto.BookedDates;
+import fr.terrier.apiterriercrm.model.entity.BookedPeriodView;
 import fr.terrier.apiterriercrm.model.enums.BookingType;
 import org.springframework.stereotype.Service;
 
@@ -11,12 +11,12 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Service
-public class AvailabilityMapper {
-    public AvailabilityResponse map(final Set<AvailabilityView> availabilityViews) {
+public class BookedPeriodMapper {
+    public BookedDates map(final Set<BookedPeriodView> bookedPeriodViews) {
         TreeSet<LocalDate> pear = new TreeSet<>();
         TreeSet<LocalDate> grapes = new TreeSet<>();
 
-        availabilityViews.forEach(projection -> {
+        bookedPeriodViews.forEach(projection -> {
             var dates = projection.getStart()
                                   .datesUntil(projection.getEnd())
                                   .collect(Collectors.toUnmodifiableSet());
@@ -27,9 +27,9 @@ public class AvailabilityMapper {
                 grapes.addAll(dates);
             }
         });
-        return AvailabilityResponse.builder()
-                                   .pearBookings(pear)
-                                   .grapesBookings(grapes)
-                                   .build();
+        return BookedDates.builder()
+                          .pearBookings(pear)
+                          .grapesBookings(grapes)
+                          .build();
     }
 }

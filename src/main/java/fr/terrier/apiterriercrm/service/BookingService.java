@@ -1,7 +1,9 @@
 package fr.terrier.apiterriercrm.service;
 
+import fr.terrier.apiterriercrm.mapper.BookedPeriodMapper;
 import fr.terrier.apiterriercrm.mapper.BookingMapper;
 import fr.terrier.apiterriercrm.mapper.BookingPeriodMapper;
+import fr.terrier.apiterriercrm.model.dto.BookedDates;
 import fr.terrier.apiterriercrm.model.dto.BookingRequest;
 import fr.terrier.apiterriercrm.model.dto.BookingResponse;
 import fr.terrier.apiterriercrm.model.dto.PaymentRequest;
@@ -26,6 +28,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 import reactor.core.scheduler.Scheduler;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -39,6 +42,7 @@ public class BookingService {
     private final PricingService pricingService;
     private final BookingMapper bookingMapper;
     private final BookingPeriodMapper bookingPeriodMapper;
+    private final BookedPeriodMapper bookedPeriodMapper;
     private final BookingRepository bookingRepository;
     private final BookingPricingDetailRepository bookingPricingDetailRepository;
     @Qualifier("datasourceScheduler")
@@ -85,6 +89,13 @@ public class BookingService {
                                                                                                            .doOnError(e -> log.error("Error while creating payment for booking completion", e))
                                                                                                            .onErrorResume(e -> abortBooking(bookingRequest).thenReturn(bookingEntity))))
                              .map(bookingMapper::map);
+    }
+    
+    public Mono<BookedDates> getBookedDates(final LocalDate start, final LocalDate end) {
+        // noinspection BlockingMethodInNonBlockingContext
+        return Mono.fromCallable(() -> bookingRepository.findByPeriodBetween(start, end))
+            .map(bookedPeriodMapper::map)
+            .subscribeOn(datasourceScheduler);
     }
 
     private Mono<Iterable<BookingPricingDetailEntity>> persistPricingDetails(final BookingEntity bookingEntity, final List<PricingDetail> pricingDetails) {

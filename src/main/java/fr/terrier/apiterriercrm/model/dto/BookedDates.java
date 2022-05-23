@@ -12,7 +12,7 @@ import java.util.TreeSet;
 @Getter
 @Setter
 @Builder
-public class AvailabilityResponse {
+public class BookedDates {
     @JsonProperty
     @JsonFormat(pattern = "yyyy-MM-dd")
     private TreeSet<LocalDate> pearBookings;

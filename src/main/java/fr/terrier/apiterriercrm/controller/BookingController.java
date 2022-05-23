@@ -1,5 +1,6 @@
 package fr.terrier.apiterriercrm.controller;
 
+import fr.terrier.apiterriercrm.model.dto.BookedDates;
 import fr.terrier.apiterriercrm.model.dto.BookingPeriod;
 import fr.terrier.apiterriercrm.model.dto.BookingRequest;
 import fr.terrier.apiterriercrm.model.dto.BookingResponse;
@@ -15,9 +16,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -34,7 +37,13 @@ public class BookingController {
     }
 
     @GetMapping
-    public Mono<List<PricingDetail>> getPriceDetail(@NotNull @Valid @ModelAttribute BookingType type,
+    public Mono<BookedDates> getBookedDates(@RequestParam @NotNull final LocalDate start,
+                                            @RequestParam @NotNull final LocalDate end) {
+        return bookingService.getBookedDates(start, end);
+    }
+
+    @GetMapping("/simulations")
+    public Mono<List<PricingDetail>> prepareBooking(@NotNull @Valid @ModelAttribute BookingType type,
                                                     @NotNull @Valid @ModelAttribute BookingPeriod period) {
         return pricingService.getBookingPriceDetails(type, period);
     }

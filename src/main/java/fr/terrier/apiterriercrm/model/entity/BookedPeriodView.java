@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDate;
 
-public interface AvailabilityView {
+public interface BookedPeriodView {
     BookingType getType();
 
     @SuppressWarnings("SpringElInspection")
