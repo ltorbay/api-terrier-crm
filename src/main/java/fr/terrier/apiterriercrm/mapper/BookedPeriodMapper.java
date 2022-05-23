@@ -14,22 +14,22 @@ import java.util.stream.Collectors;
 public class BookedPeriodMapper {
     public BookedDates map(final Set<BookedPeriodView> bookedPeriodViews) {
         TreeSet<LocalDate> pear = new TreeSet<>();
-        TreeSet<LocalDate> grapes = new TreeSet<>();
+        TreeSet<LocalDate> grape = new TreeSet<>();
 
         bookedPeriodViews.forEach(projection -> {
             var dates = projection.getStart()
                                   .datesUntil(projection.getEnd())
                                   .collect(Collectors.toUnmodifiableSet());
-            if (!BookingType.GRAPES.equals(projection.getType())) {
+            if (!BookingType.GRAPE.equals(projection.getType())) {
                 pear.addAll(dates);
             }
             if (!BookingType.PEAR.equals(projection.getType())) {
-                grapes.addAll(dates);
+                grape.addAll(dates);
             }
         });
         return BookedDates.builder()
                           .pearBookings(pear)
-                          .grapesBookings(grapes)
+                          .grapeBookings(grape)
                           .build();
     }
 }

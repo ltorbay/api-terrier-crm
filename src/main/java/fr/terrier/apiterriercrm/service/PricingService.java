@@ -17,6 +17,7 @@ import reactor.core.publisher.SynchronousSink;
 import reactor.core.scheduler.Scheduler;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -40,19 +41,13 @@ public class PricingService {
                    .map(periodConfigurationMapper::map);
     }
 
-    public Mono<List<PricingDetail>> getBookingPriceDetails(final BookingType type, final BookingPeriod period) {
-        return getPricingPattern(period.getStart(), period.getEnd())
+    public Mono<List<PricingDetail>> getBookingPriceDetails(final BookingType type, final LocalDate start, LocalDate end) {
+        return getPricingPattern(start, end)
                 .handle((PeriodConfiguration periodConfiguration, SynchronousSink<PeriodConfiguration> sink) -> {
-                    if (periodConfiguration.getPricing().getNightlyRate(type) == null) {
-                        sink.error(new ResponseException(HttpStatus.BAD_REQUEST,
-                                                         String.format("Period %s cannot be booked fo type %s. No matching rate exist in configuration", period, type)));
-                        return;
-                    }
-
-                    var consecutiveDays = period.consecutiveDays();
+                    var consecutiveDays = ChronoUnit.DAYS.between(start, end) + 1;
                     if (consecutiveDays < periodConfiguration.getMinConsecutiveDays()) {
                         sink.error(new ResponseException(HttpStatus.BAD_REQUEST,
-                                                         String.format("Period %s cannot be booked fo type %s. Minimal consecutive days requirement not met", period, type)));
+                                                         String.format("Period %s - %s cannot be booked fo type %s. Minimal consecutive days requirement not met", start, end, type)));
                         return;
                     }
                     sink.next(periodConfiguration);
@@ -60,12 +55,12 @@ public class PricingService {
                 .collectSortedList(Comparator.comparing(PeriodConfiguration::getStart))
                 .map(configurations -> {
                     var details = new ArrayList<PricingDetail>();
-                    var previous = new AtomicReference<>(period.getStart());
+                    var previous = new AtomicReference<>(start);
                     IntStream.range(0, configurations.size())
                              .forEach(i -> {
-                                 var end = i + 1 >= configurations.size() ? period.getEnd() : configurations.get(i + 1).getStart().minusDays(1L);
-                                 details.add(new PricingDetail(configurations.get(i), new BookingPeriod(previous.get(), end)));
-                                 previous.set(end.plusDays(1L));
+                                 var detailEnd = i + 1 >= configurations.size() ? end : configurations.get(i + 1).getStart().minusDays(1L);
+                                 details.add(new PricingDetail(configurations.get(i), new BookingPeriod(previous.get(), detailEnd), type));
+                                 previous.set(detailEnd.plusDays(1L));
                              });
                     return details;
                 });

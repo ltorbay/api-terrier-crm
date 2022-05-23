@@ -18,5 +18,5 @@ public class BookedDates {
     private TreeSet<LocalDate> pearBookings;
     @JsonProperty
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private TreeSet<LocalDate> grapesBookings;
+    private TreeSet<LocalDate> grapeBookings;
 }

@@ -39,12 +39,15 @@ public class BookingController {
     @GetMapping
     public Mono<BookedDates> getBookedDates(@RequestParam @NotNull final LocalDate start,
                                             @RequestParam @NotNull final LocalDate end) {
+        // TODO check start before end
         return bookingService.getBookedDates(start, end);
     }
 
     @GetMapping("/simulations")
-    public Mono<List<PricingDetail>> prepareBooking(@NotNull @Valid @ModelAttribute BookingType type,
-                                                    @NotNull @Valid @ModelAttribute BookingPeriod period) {
-        return pricingService.getBookingPriceDetails(type, period);
+    public Mono<List<PricingDetail>> prepareBooking(@NotNull @Valid @RequestParam BookingType type,
+                                                    @RequestParam @NotNull final LocalDate start,
+                                                    @RequestParam @NotNull final LocalDate end) {
+        // TODO check start before end
+        return pricingService.getBookingPriceDetails(type, start, end);
     }
 }

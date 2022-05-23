@@ -8,6 +8,7 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 
 @Getter
 @AllArgsConstructor
@@ -26,7 +27,7 @@ public class BookingPeriod {
         return start.isBefore(end);
     }
 
-    public Integer consecutiveDays() {
-        return Period.between(start, end).getDays() + 1;
+    public Long consecutiveDays() {
+        return ChronoUnit.DAYS.between(start, end) + 1L;
     }
 }

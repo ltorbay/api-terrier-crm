@@ -19,8 +19,8 @@ public class PricingConfigurationEntity {
     @Embedded.Empty(prefix = "both_")
     private PricingEntity both;
     @Positive
-    @Embedded.Empty(prefix = "grapes_")
-    private PricingEntity grapes;
+    @Embedded.Empty(prefix = "grape_")
+    private PricingEntity grape;
     @Positive
     @Embedded.Empty(prefix = "pear_")
     private PricingEntity pear;

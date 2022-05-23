@@ -14,14 +14,14 @@ public class PricingConfiguration {
     @Positive
     private Pricing both;
     @Positive
-    private Pricing grapes;
+    private Pricing grape;
     @Positive
     private Pricing pear;
 
     public @Nullable Long getNightlyRate(BookingType type) {
         return switch (type) {
             case BOTH -> both.nightly;
-            case GRAPES -> grapes == null ? null : grapes.nightly;
+            case GRAPE -> grape == null ? null : grape.nightly;
             case PEAR -> pear == null ? null : pear.nightly;
         };
     }
@@ -29,7 +29,7 @@ public class PricingConfiguration {
     public @Nullable Long getWeeklyRate(BookingType type) {
         return switch (type) {
             case BOTH -> both.weekly;
-            case GRAPES -> grapes == null ? null : grapes.weekly;
+            case GRAPE -> grape == null ? null : grape.weekly;
             case PEAR -> pear == null ? null : pear.weekly;
         };
     }

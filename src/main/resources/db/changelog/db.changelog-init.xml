@@ -87,12 +87,10 @@
                 <constraints nullable="false"/>
             </column>
             <column name="configuration_pricing_both_nightly" type="bigint"/>
-            <column name="configuration_pricing_grapes_nightly" type="bigint"/>
+            <column name="configuration_pricing_grape_nightly" type="bigint"/>
             <column name="configuration_pricing_pear_nightly" type="bigint"/>
-            <column name="configuration_pricing_both_weekly" type="bigint">
-                <constraints nullable="false"/>
-            </column>
-            <column name="configuration_pricing_grapes_weekly" type="bigint"/>
+            <column name="configuration_pricing_both_weekly" type="bigint"/>
+            <column name="configuration_pricing_grape_weekly" type="bigint"/>
             <column name="configuration_pricing_pear_weekly" type="bigint"/>
             <column name="start" type="date">
                 <constraints nullable="false"/>
@@ -122,15 +120,11 @@
             <column name="start" type="date">
                 <constraints nullable="false"/>
             </column>
-            <column name="pricing_both_nightly" type="bigint">
-                <constraints nullable="false"/>
-            </column>
-            <column name="pricing_grapes_nightly" type="bigint"/>
+            <column name="pricing_both_nightly" type="bigint"/>
+            <column name="pricing_grape_nightly" type="bigint"/>
             <column name="pricing_pear_nightly" type="bigint"/>
-            <column name="pricing_both_weekly" type="bigint">
-                <constraints nullable="false"/>
-            </column>
-            <column name="pricing_grapes_weekly" type="bigint"/>
+            <column name="pricing_both_weekly" type="bigint"/>
+            <column name="pricing_grape_weekly" type="bigint"/>
             <column name="pricing_pear_weekly" type="bigint"/>
         </createTable>
         <createIndex tableName="PeriodConfiguration" indexName="PeriodConfiguration_start">
@@ -145,8 +139,8 @@
             <column name="start" value="1970-01-01"/>
             <column name="pricing_both_weekly" value="200000"/>
             <column name="pricing_both_nightly" value="30000"/>
-            <column name="pricing_grapes_weekly" value="100000"/>
-            <column name="pricing_grapes_nightly" value="15000"/>
+            <column name="pricing_grape_weekly" value="100000"/>
+            <column name="pricing_grape_nightly" value="15000"/>
             <column name="pricing_pear_weekly" value="135000"/>
             <column name="pricing_pear_nightly" value="20000"/>
         </insert>

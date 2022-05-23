@@ -51,10 +51,10 @@ public class BookingService {
     public Mono<BookingResponse> book(@Valid @RequestBody BookingRequest bookingRequest) {
         // TODO map and handle booking errors to ResponseException
         // TODO check that period is not already booked (availability service ?)
-        return pricingService.getBookingPriceDetails(bookingRequest.getType(), bookingRequest.getPeriod())
+        return pricingService.getBookingPriceDetails(bookingRequest.getType(), bookingRequest.getPeriod().getStart(), bookingRequest.getPeriod().getEnd())
                              .handle((List<PricingDetail> pricingDetails, SynchronousSink<PaymentRequest> sink) -> {
                                  var amount = pricingDetails.stream()
-                                                            .mapToLong(detail -> detail.totalCents(bookingRequest.getType()))
+                                                            .mapToLong(PricingDetail::getTotalCents)
                                                             .sum();
                                  if (!Objects.equals(amount, bookingRequest.getInformation().getPaymentAmountCents())) {
                                      sink.error(new ResponseException(HttpStatus.BAD_REQUEST, "Calculated booking amount %d and amount sent by client %d do not match", amount, bookingRequest.getInformation().getPaymentAmountCents()));
@@ -90,12 +90,12 @@ public class BookingService {
                                                                                                            .onErrorResume(e -> abortBooking(bookingRequest).thenReturn(bookingEntity))))
                              .map(bookingMapper::map);
     }
-    
+
     public Mono<BookedDates> getBookedDates(final LocalDate start, final LocalDate end) {
         // noinspection BlockingMethodInNonBlockingContext
         return Mono.fromCallable(() -> bookingRepository.findByPeriodBetween(start, end))
-            .map(bookedPeriodMapper::map)
-            .subscribeOn(datasourceScheduler);
+                   .map(bookedPeriodMapper::map)
+                   .subscribeOn(datasourceScheduler);
     }
 
     private Mono<Iterable<BookingPricingDetailEntity>> persistPricingDetails(final BookingEntity bookingEntity, final List<PricingDetail> pricingDetails) {
