@@ -42,9 +42,10 @@ public class PricingService {
     }
 
     public Mono<List<PricingDetail>> getBookingPriceDetails(final BookingType type, final LocalDate start, LocalDate end) {
-        return getPricingPattern(start, end)
+        // Last day has no night -> it is free !
+        return getPricingPattern(start, end.minusDays(1L))
                 .handle((PeriodConfiguration periodConfiguration, SynchronousSink<PeriodConfiguration> sink) -> {
-                    var consecutiveDays = ChronoUnit.DAYS.between(start, end) + 1;
+                    var consecutiveDays = ChronoUnit.DAYS.between(start, end) + 2;
                     if (consecutiveDays < periodConfiguration.getMinConsecutiveDays()) {
                         sink.error(new ResponseException(HttpStatus.BAD_REQUEST,
                                                          String.format("Period %s - %s cannot be booked fo type %s. Minimal consecutive days requirement not met", start, end, type)));
@@ -58,9 +59,9 @@ public class PricingService {
                     var previous = new AtomicReference<>(start);
                     IntStream.range(0, configurations.size())
                              .forEach(i -> {
-                                 var detailEnd = i + 1 >= configurations.size() ? end : configurations.get(i + 1).getStart().minusDays(1L);
+                                 var detailEnd = i + 1 >= configurations.size() ? end : configurations.get(i + 1).getStart();
                                  details.add(new PricingDetail(configurations.get(i), new BookingPeriod(previous.get(), detailEnd), type));
-                                 previous.set(detailEnd.plusDays(1L));
+                                 previous.set(detailEnd);
                              });
                     return details;
                 });
