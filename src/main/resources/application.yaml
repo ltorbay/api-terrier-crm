@@ -14,7 +14,9 @@ spring:
   mvc:
     converters:
       preferred-json-mapper: jackson
-  
+logging:
+  pattern:
+    level: "%replace(xrid:%X{XRID} ){'xrid: ',''}%replace(xsid:%X{XSID} ){'xsid: ',''}%5p"
 schedulers:
   datasource:
     pool-size: 100
