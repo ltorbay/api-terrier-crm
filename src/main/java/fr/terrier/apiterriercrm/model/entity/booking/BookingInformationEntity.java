@@ -1,5 +1,6 @@
 package fr.terrier.apiterriercrm.model.entity.booking;
 
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,4 +15,7 @@ public class BookingInformationEntity {
     private Integer guestsCount;
     @Size(max = 2000)
     private String comment;
+    private String paymentSourceId;
+    @Positive
+    private Long paymentAmountCents;
 }

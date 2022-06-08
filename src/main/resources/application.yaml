@@ -17,10 +17,15 @@ spring:
 logging:
   pattern:
     level: "%replace(xrid:%X{XRID} ){'xrid: ',''}%replace(xsid:%X{XSID} ){'xsid: ',''}%5p"
+  level:
+    root: info
 schedulers:
   datasource:
     pool-size: 100
     queue-task-cap: 500
+admin.users:
+  - login: user
+    password: "$2a$12$BMfXJWpJvluMUy89bQuA1uV0YbNmiYdhasxNz3ahCEE4wIcoc8XOS"
 
 payments.square:
   access-token: my-access-token

@@ -58,6 +58,8 @@
             </column>
             <column name="guests_count" type="int"/>
             <column name="comment" type="mediumtext"/>
+            <column name="payment_source_id" type="varchar(255)"/>
+            <column name="payment_amount_cents" type="int"/>
         </createTable>
         <addForeignKeyConstraint baseTableName="Booking"
                                  baseColumnNames="user_id"

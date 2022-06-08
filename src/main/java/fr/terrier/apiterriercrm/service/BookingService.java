@@ -4,6 +4,7 @@ import fr.terrier.apiterriercrm.mapper.BookedPeriodMapper;
 import fr.terrier.apiterriercrm.mapper.BookingMapper;
 import fr.terrier.apiterriercrm.mapper.BookingPeriodMapper;
 import fr.terrier.apiterriercrm.model.dto.BookedDates;
+import fr.terrier.apiterriercrm.model.dto.BookingDetail;
 import fr.terrier.apiterriercrm.model.dto.BookingRequest;
 import fr.terrier.apiterriercrm.model.dto.BookingResponse;
 import fr.terrier.apiterriercrm.model.dto.PaymentRequest;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 import reactor.core.scheduler.Scheduler;
@@ -76,6 +78,8 @@ public class BookingService {
                                                                                                    .information(BookingInformationEntity.builder()
                                                                                                                                         .comment(bookingRequest.getInformation().getComment())
                                                                                                                                         .guestsCount(bookingRequest.getInformation().getGuestsCount())
+                                                                                                                                        .paymentAmountCents(bookingRequest.getInformation().getPaymentAmountCents())
+                                                                                                                                        .paymentSourceId(bookingRequest.getInformation().getPaymentSourceId())
                                                                                                                                         .build())
                                                                                                    .type(bookingRequest.getType())
                                                                                                    .idempotencyKey(paymentRequest.getIdempotencyKey().toString())
@@ -88,14 +92,22 @@ public class BookingService {
                                                                                                            .flatMap(paymentResponse -> completeBooking(bookingEntity.getId(), paymentResponse.getPayment().getId()).thenReturn(bookingEntity))
                                                                                                            .doOnError(e -> log.error("Error while creating payment for booking completion", e))
                                                                                                            .onErrorResume(e -> abortBooking(bookingRequest).thenReturn(bookingEntity))))
-                             .map(bookingMapper::map);
+                             .map(bookingMapper::entityToResponse);
     }
 
     public Mono<BookedDates> getBookedDates(final LocalDate start, final LocalDate end) {
         // noinspection BlockingMethodInNonBlockingContext
-        return Mono.fromCallable(() -> bookingRepository.findByPeriodBetween(start, end))
+        return Mono.fromCallable(() -> bookingRepository.findPeriodViewByPeriodBetween(start, end))
                    .map(bookedPeriodMapper::map)
                    .subscribeOn(datasourceScheduler);
+    }
+
+    public Flux<BookingDetail> getBookingDetail(final LocalDate start, final LocalDate end) {
+        // noinspection BlockingMethodInNonBlockingContext
+        return Mono.fromCallable(() -> bookingRepository.findByPeriodBetween(start, end))
+                   .subscribeOn(datasourceScheduler)
+                   .flatMapIterable(set -> set)
+                   .map(bookingMapper::entityToDetail);
     }
 
     private Mono<Iterable<BookingPricingDetailEntity>> persistPricingDetails(final BookingEntity bookingEntity, final List<PricingDetail> pricingDetails) {
@@ -122,7 +134,7 @@ public class BookingService {
     private Mono<BookingEntity> abortBooking(final BookingRequest bookingRequest) {
         // TODO return ResponseException after abort ?
         // TODO implement abort
-        return Mono.just(bookingMapper.map(bookingRequest));
+        return Mono.just(bookingMapper.entityToResponse(bookingRequest));
     }
 }
 

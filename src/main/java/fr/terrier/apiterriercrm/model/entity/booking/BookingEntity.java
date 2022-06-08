@@ -19,6 +19,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Persistent
 @Table("Booking")
 public class BookingEntity {
+    // TODO add auditing
     @Id
     private Long id;
 

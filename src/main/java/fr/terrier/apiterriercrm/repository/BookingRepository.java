@@ -22,6 +22,10 @@ public interface BookingRepository extends CrudRepository<BookingEntity, Long> {
                                   @Param("id") Long id);
 
     @Query("select type, start, end from Booking where :start <= end and :end >= start")
-    Set<BookedPeriodView> findByPeriodBetween(@Param("start") LocalDate start,
-                                              @Param("end") LocalDate end);
+    Set<BookedPeriodView> findPeriodViewByPeriodBetween(@Param("start") LocalDate start,
+                                                        @Param("end") LocalDate end);
+
+    @Query("select * from Booking where :start <= end and :end >= start")
+    Set<BookingEntity> findByPeriodBetween(@Param("start") LocalDate start,
+                                           @Param("end") LocalDate end);
 }
