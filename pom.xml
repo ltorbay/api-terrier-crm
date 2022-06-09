@@ -13,6 +13,12 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>api-terrier-crm</name>
     <description>api-terrier-crm</description>
+    <scm>
+        <tag>HEAD</tag>
+        <developerConnection>scm:git:https://github.com/ltorbay/api-terrier-crm</developerConnection>
+        <connection>scm:git:https://github.com/ltorbay/api-terrier-crm</connection>
+        <url>scm:git:https://github.com/ltorbay/api-terrier-crm</url>
+    </scm>
     <properties>
         <java.version>17</java.version>
     </properties>
@@ -159,6 +165,58 @@
                             -Amapstruct.defaultComponentModel=spring
                         </compilerArg>
                     </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>1.4.13</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                    </execution>
+                    <execution>
+                        <id>tag-latest</id>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                        <configuration>
+                            <tag>latest</tag>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <username>${project.groupId}</username>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <password>${env.GITHUB_TOKEN}</password>
+                    <repository>ghcr.io/ltorbay/api-terrier-crm</repository>
+                    <tag>${project.version}</tag>
+                    <buildArgs>
+                        <buildVersion>${project.version}</buildVersion>
+                    </buildArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven-deploy-plugin.version}</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>1.11.2</version>
+                <configuration>
+                    <tag>${project.version}</tag>
                 </configuration>
             </plugin>
         </plugins>
