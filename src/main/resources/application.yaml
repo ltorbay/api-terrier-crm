@@ -23,10 +23,13 @@ schedulers:
   datasource:
     pool-size: 100
     queue-task-cap: 500
+
+cors:
+  allowed-origins:
+    - http://localhost:3000
 admin.users:
   - login: user
     password: "$2a$12$BMfXJWpJvluMUy89bQuA1uV0YbNmiYdhasxNz3ahCEE4wIcoc8XOS"
-
 payments.square:
   access-token: my-access-token
   environment: SANDBOX

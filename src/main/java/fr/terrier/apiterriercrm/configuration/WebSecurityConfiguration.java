@@ -1,5 +1,6 @@
 package fr.terrier.apiterriercrm.configuration;
 
+import fr.terrier.apiterriercrm.properties.CorsProperties;
 import fr.terrier.apiterriercrm.properties.UserCredentials;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebSecurityConfiguration {
     private final UserCredentials adminUsers;
+    private final CorsProperties corsProperties;
 
     @Bean
     SecurityWebFilterChain springWebFilterChain(ServerHttpSecurity http) {
@@ -38,7 +40,7 @@ public class WebSecurityConfiguration {
 
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(corsProperties.getAllowedOrigins());
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
