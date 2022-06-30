@@ -5,6 +5,7 @@ import fr.terrier.apiterriercrm.properties.UserCredentials;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
@@ -32,6 +33,7 @@ public class WebSecurityConfiguration {
                    .httpBasic().and()
                    .formLogin().disable()
                    .authorizeExchange(authorize -> authorize
+                           .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                            .pathMatchers("/public/**").permitAll()
                            .pathMatchers("/admin/**").hasRole("ADMIN")
                            .anyExchange().denyAll())
@@ -41,7 +43,8 @@ public class WebSecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(corsProperties.getAllowedOrigins());
-        configuration.setAllowedMethods(List.of("GET", "POST", "DELETE"));
+        configuration.addAllowedHeader("content-type");
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

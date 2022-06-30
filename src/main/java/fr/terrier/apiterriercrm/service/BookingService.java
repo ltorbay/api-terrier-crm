@@ -91,6 +91,7 @@ public class BookingService {
                                                                    .flatMap(bookingEntity -> paymentService.createPayment(paymentRequest, bookingRequest.getUser().getEmail(), bookingEntity.getUserId())
                                                                                                            .flatMap(paymentResponse -> completeBooking(bookingEntity.getId(), paymentResponse.getPayment().getId()).thenReturn(bookingEntity))
                                                                                                            .doOnError(e -> log.error("Error while creating payment for booking completion", e))
+                                                                                                           // FIXME this returns 200 even if the payment fails !!!
                                                                                                            .onErrorResume(e -> abortBooking(bookingRequest).thenReturn(bookingEntity))))
                              .map(bookingMapper::entityToResponse);
     }
