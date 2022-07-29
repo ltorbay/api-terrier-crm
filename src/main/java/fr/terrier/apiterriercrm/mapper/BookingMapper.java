@@ -16,7 +16,6 @@ public interface BookingMapper {
 
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "status", ignore = true)
-    @Mapping(target = "idempotencyKey", ignore = true)
     @Mapping(target = "id", ignore = true)
     BookingEntity entityToResponse(final BookingRequest request);
 }

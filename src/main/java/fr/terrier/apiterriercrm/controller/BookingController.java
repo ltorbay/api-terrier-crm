@@ -1,13 +1,13 @@
 package fr.terrier.apiterriercrm.controller;
 
 import fr.terrier.apiterriercrm.model.dto.BookedDates;
+import fr.terrier.apiterriercrm.model.dto.BookingPricingCalculation;
 import fr.terrier.apiterriercrm.model.dto.BookingRequest;
 import fr.terrier.apiterriercrm.model.dto.BookingResponse;
 import fr.terrier.apiterriercrm.model.dto.PricingDetail;
 import fr.terrier.apiterriercrm.model.enums.BookingType;
+import fr.terrier.apiterriercrm.model.exception.BadRequestException;
 import fr.terrier.apiterriercrm.service.BookingService;
-import fr.terrier.apiterriercrm.service.PricingService;
-import fr.terrier.apiterriercrm.utils.LoggingUtils;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,6 @@ import java.util.List;
 @Slf4j
 public class BookingController {
     private final BookingService bookingService;
-    private final PricingService pricingService;
 
     @PostMapping
     public Mono<BookingResponse> book(@Valid @RequestBody BookingRequest bookingRequest) {
@@ -39,15 +38,19 @@ public class BookingController {
     @GetMapping
     public Mono<BookedDates> getBookedDates(@RequestParam @NotNull final LocalDate start,
                                             @RequestParam @NotNull final LocalDate end) {
-        // TODO check start before end
+        if(start.isAfter(end)) {
+            return Mono.error(new BadRequestException("Queried start date is after end date"));
+        }
         return bookingService.getBookedDates(start, end);
     }
 
     @GetMapping("/simulations")
-    public Mono<List<PricingDetail>> prepareBooking(@NotNull @Valid @RequestParam BookingType type,
-                                                    @RequestParam @NotNull final LocalDate start,
-                                                    @RequestParam @NotNull final LocalDate end) {
-        // TODO check start before end
-        return pricingService.getBookingPriceDetails(type, start, end);
+    public Mono<BookingPricingCalculation> prepareBooking(@NotNull @Valid @RequestParam BookingType type,
+                                                          @RequestParam @NotNull final LocalDate start,
+                                                          @RequestParam @NotNull final LocalDate end) {
+        if(start.isAfter(end)) {
+            return Mono.error(new BadRequestException("Queried start date is after end date"));
+        }
+        return bookingService.getBookingPriceDetails(type, start, end);
     }
 }

@@ -8,22 +8,24 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
-public class PaymentRequest {
+public class BookingDetails {
     @NonNull
     @Positive
     private Long amount;
     
     @NonNull
-    private List<PricingDetail> details;
+    private List<PricingDetail> pricing;
     
     @NotBlank
     private String sourceId;
     
     @NonNull
-    private UUID idempotencyKey;
+    private Boolean downPayment;
+    
+    @NonNull
+    private Long downPaymentAmount;
 }

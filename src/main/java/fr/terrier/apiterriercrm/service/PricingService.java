@@ -5,12 +5,15 @@ import fr.terrier.apiterriercrm.model.dto.BookingPeriod;
 import fr.terrier.apiterriercrm.model.dto.PeriodConfiguration;
 import fr.terrier.apiterriercrm.model.dto.PricingDetail;
 import fr.terrier.apiterriercrm.model.enums.BookingType;
+import fr.terrier.apiterriercrm.model.exception.BookingException;
 import fr.terrier.apiterriercrm.model.exception.ResponseException;
+import fr.terrier.apiterriercrm.repository.BookingRepository;
 import fr.terrier.apiterriercrm.repository.PeriodConfigurationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
@@ -29,6 +32,7 @@ import java.util.stream.IntStream;
 public class PricingService {
     private final PeriodConfigurationMapper periodConfigurationMapper;
     private final PeriodConfigurationRepository periodConfigurationRepository;
+    private final BookingRepository bookingRepository;
     @Qualifier("datasourceScheduler")
     private final Scheduler datasourceScheduler;
 
@@ -42,28 +46,35 @@ public class PricingService {
     }
 
     public Mono<List<PricingDetail>> getBookingPriceDetails(final BookingType type, final LocalDate start, LocalDate end) {
-        // Last day has no night -> it is free !
-        return getPricingPattern(start, end.minusDays(1L))
-                .handle((PeriodConfiguration periodConfiguration, SynchronousSink<PeriodConfiguration> sink) -> {
-                    var consecutiveDays = ChronoUnit.DAYS.between(start, end) + 2;
-                    if (consecutiveDays < periodConfiguration.getMinConsecutiveDays()) {
-                        sink.error(new ResponseException(HttpStatus.BAD_REQUEST,
-                                                         String.format("Period %s - %s cannot be booked fo type %s. Minimal consecutive days requirement not met", start, end, type)));
-                        return;
-                    }
-                    sink.next(periodConfiguration);
-                })
-                .collectSortedList(Comparator.comparing(PeriodConfiguration::getStart))
-                .map(configurations -> {
-                    var details = new ArrayList<PricingDetail>();
-                    var previous = new AtomicReference<>(start);
-                    IntStream.range(0, configurations.size())
-                             .forEach(i -> {
-                                 var detailEnd = i + 1 >= configurations.size() ? end : configurations.get(i + 1).getStart();
-                                 details.add(new PricingDetail(configurations.get(i), new BookingPeriod(previous.get(), detailEnd), type));
-                                 previous.set(detailEnd);
-                             });
-                    return details;
-                });
+        // noinspection BlockingMethodInNonBlockingContext
+        return Mono.fromCallable(() -> bookingRepository.findPeriodViewByTypeAndPeriodBetween(type, 
+                                                                                              start.plusDays(1), 
+                                                                                              end.minusDays(1)))
+                   .subscribeOn(datasourceScheduler)
+                   .filter(CollectionUtils::isEmpty)
+                   .switchIfEmpty(Mono.error(new BookingException("Booking already exists for period %s - %s and type %s", start, end, type)))
+                   // Last day has no night -> it is free !
+                   .flatMap(emptyPeriods -> getPricingPattern(start, end.minusDays(1L))
+                           .handle((PeriodConfiguration periodConfiguration, SynchronousSink<PeriodConfiguration> sink) -> {
+                               var consecutiveDays = ChronoUnit.DAYS.between(start, end) + 2;
+                               if (consecutiveDays < periodConfiguration.getMinConsecutiveDays()) {
+                                   sink.error(new ResponseException(HttpStatus.BAD_REQUEST,
+                                                                    String.format("Period %s - %s cannot be booked fo type %s. Minimal consecutive days requirement not met", start, end, type)));
+                                   return;
+                               }
+                               sink.next(periodConfiguration);
+                           })
+                           .collectSortedList(Comparator.comparing(PeriodConfiguration::getStart))
+                           .map(configurations -> {
+                               var details = new ArrayList<PricingDetail>();
+                               var previous = new AtomicReference<>(start);
+                               IntStream.range(0, configurations.size())
+                                        .forEach(i -> {
+                                            var detailEnd = i + 1 >= configurations.size() ? end : configurations.get(i + 1).getStart();
+                                            details.add(new PricingDetail(configurations.get(i), new BookingPeriod(previous.get(), detailEnd), type));
+                                            previous.set(detailEnd);
+                                        });
+                               return details;
+                           }));
     }
 }

@@ -9,9 +9,21 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "payments.square")
+@ConfigurationProperties(prefix = "payments")
 public class PaymentProperties {
-    private String accessToken;
-    private Environment environment;
-    private String currency;
+    private Square square;
+    private Double tvaPercentage;
+    private Double downPaymentRatio;
+    private Integer dueDateMinDelayDays;
+    private Integer reminderDays;
+    private String reminderMessage;
+
+    @Getter
+    @Setter
+    public static class Square {
+        private String accessToken;
+        private Environment environment;
+        private String currency;
+        private String locationId;
+    }
 }

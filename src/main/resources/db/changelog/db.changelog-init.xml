@@ -147,4 +147,28 @@
             <column name="pricing_pear_nightly" value="20000"/>
         </insert>
     </changeSet>
+    <changeSet id="202207281147" author="ltorbay">
+        <comment>Remove Booking payment idempotency key</comment>
+        <dropColumn tableName="Booking" columnName="idempotency_key"/>
+    </changeSet>
+    <changeSet id="202207281638" author="ltorbay">
+        <comment>Add down_payment column to Booking table</comment>
+        <addColumn tableName="Booking">
+            <column name="down_payment" type="int"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="202207281808" author="ltorbay">
+        <comment>Create crmId column for User table</comment>
+        <addColumn tableName="User">
+            <column name="crm_id" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="202207291546" author="ltorbay">
+        <comment>Update payment id column to invoice id for square tracking</comment>
+        <renameColumn tableName="Booking" 
+                      oldColumnName="payment_id" 
+                      newColumnName="invoice_id"
+                      columnDataType="varchar(255)"/>
+    </changeSet>
+<!--    TODO Add period configurations-->
 </databaseChangeLog>

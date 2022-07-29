@@ -1,11 +1,13 @@
 package fr.terrier.apiterriercrm.model.exception;
 
-public class InternalServerException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class InternalServerException extends ResponseException {
     public InternalServerException(String message, Throwable cause) {
-        super(message, cause);
+        super(HttpStatus.INTERNAL_SERVER_ERROR, message, cause);
     }
 
     public InternalServerException(String message, Object... args) {
-        super(String.format(message, args));
+        super(HttpStatus.INTERNAL_SERVER_ERROR, String.format(message, args));
     }
 }

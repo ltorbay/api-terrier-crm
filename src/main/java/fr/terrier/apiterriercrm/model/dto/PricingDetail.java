@@ -28,7 +28,6 @@ public class PricingDetail {
         var paidNights = bookingPeriod.consecutiveDays() - 1L;
         var weeklyOptional = Optional.ofNullable(periodConfiguration.getPricing().getWeeklyRate(type));
 
-        // FIXME Do not make calculation for last day of period as it is not used in the total price !
         var nightlyRate = Optional.ofNullable(periodConfiguration.getPricing().getNightlyRate(type))
                                   .orElseGet(() -> weeklyOptional.map(weekly -> 100 * (weekly / (100 * NIGHTS_IN_FULL_WEEK)))
                                                                  .orElseThrow(() -> new InternalServerException("Missing expected nightly rate with type %s for pricing calculation on detail %s", type, this)));

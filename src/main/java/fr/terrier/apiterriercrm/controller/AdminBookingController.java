@@ -1,6 +1,7 @@
 package fr.terrier.apiterriercrm.controller;
 
 import fr.terrier.apiterriercrm.model.dto.BookingDetail;
+import fr.terrier.apiterriercrm.model.exception.BadRequestException;
 import fr.terrier.apiterriercrm.service.BookingService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +18,15 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class AdminBookingController {
     private final BookingService bookingService;
+
     @GetMapping
     public Flux<BookingDetail> getBookings(@RequestParam @NotNull final LocalDate start,
                                            @RequestParam @NotNull final LocalDate end) {
-        // TODO check start before end
+        if (start.isAfter(end)) {
+            return Flux.error(new BadRequestException("Queried start date is after end date"));
+        }
+        
         return bookingService.getBookingDetail(start, end);
     }
-    
+
 }

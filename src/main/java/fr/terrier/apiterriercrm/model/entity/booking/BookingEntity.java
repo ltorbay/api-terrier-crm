@@ -32,10 +32,6 @@ public class BookingEntity {
     private BookingStatus status = BookingStatus.CREATED;
 
     @NotNull
-    @Column
-    private String idempotencyKey;
-
-    @NotNull
     private BookingType type;
 
     @Valid

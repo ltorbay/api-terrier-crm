@@ -14,8 +14,8 @@ public class PaymentConfiguration {
     @Bean
     SquareClient squareClient() {
         return new SquareClient.Builder()
-                .environment(paymentProperties.getEnvironment())
-                .accessToken(paymentProperties.getAccessToken())
+                .environment(paymentProperties.getSquare().getEnvironment())
+                .accessToken(paymentProperties.getSquare().getAccessToken())
                 .build();
     }
 }

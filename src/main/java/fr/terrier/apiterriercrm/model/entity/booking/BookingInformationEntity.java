@@ -18,4 +18,6 @@ public class BookingInformationEntity {
     private String paymentSourceId;
     @Positive
     private Long paymentAmountCents;
+    @Positive
+    private Boolean downPayment;
 }

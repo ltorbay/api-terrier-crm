@@ -17,5 +17,7 @@ public class BookingInformation {
     @Positive
     @NotNull
     private Long paymentAmountCents;
+    @NotNull
+    private Boolean downPayment;
     private String comment;
 }

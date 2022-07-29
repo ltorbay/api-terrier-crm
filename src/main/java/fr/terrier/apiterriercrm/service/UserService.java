@@ -15,22 +15,25 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final CrmService crmService;
     @Qualifier("datasourceScheduler")
     private final Scheduler datasourceScheduler;
 
     public Mono<UserEntity> createOrGet(User user) {
         // noinspection BlockingMethodInNonBlockingContext
-        return Mono.fromCallable(() -> userRepository.findByEmail(user.getEmail()))
+        return Mono.fromCallable(() -> userRepository.findByEmailAndCrmIdNotNull(user.getEmail()))
                    .subscribeOn(datasourceScheduler)
                    .filter(Optional::isPresent)
                    .map(Optional::get)
-                   .switchIfEmpty(Mono.fromCallable(() -> userRepository.save(UserEntity.builder()
-                                                                                        .firstName(user.getFirstName())
-                                                                                        .lastName(user.getLastName())
-                                                                                        .email(user.getEmail())
-                                                                                        .birthDate(user.getBirthDate())
-                                                                                        .phoneNumber(user.getPhoneNumber())
-                                                                                        .build())))
+                   .switchIfEmpty(crmService.createCustomer(user)
+                                            .flatMap(customer -> Mono.fromCallable(() -> userRepository.save(UserEntity.builder()
+                                                                                                                       .crmId(customer.getId())
+                                                                                                                       .firstName(user.getFirstName())
+                                                                                                                       .lastName(user.getLastName())
+                                                                                                                       .email(user.getEmail())
+                                                                                                                       .birthDate(user.getBirthDate())
+                                                                                                                       .phoneNumber(user.getPhoneNumber())
+                                                                                                                       .build()))))
                    .subscribeOn(datasourceScheduler);
     }
 }

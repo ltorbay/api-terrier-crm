@@ -19,6 +19,9 @@ import java.time.LocalDate;
 public class UserEntity {
     @Id
     private Long id;
+    
+    @NotNull
+    private String crmId;
 
     @NotNull
     private String firstName;

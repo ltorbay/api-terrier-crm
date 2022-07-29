@@ -14,8 +14,19 @@ public class SchedulersConfiguration {
     @Value("${schedulers.datasource.queue-task-cap}")
     private int datasourceSchedulerQueueSize;
 
+    @Value("${schedulers.payment.pool-size}")
+    private int paymentSchedulerPoolSize;
+
+    @Value("${schedulers.datasource.queue-task-cap}")
+    private int paymentSchedulerQueueSize;
+
     @Bean
     public Scheduler datasourceScheduler() {
         return Schedulers.newBoundedElastic(connectionPoolSize, datasourceSchedulerQueueSize, "datasourceScheduler");
+    }
+    
+    @Bean
+    public Scheduler paymentScheduler() {
+        return Schedulers.newBoundedElastic(paymentSchedulerPoolSize, paymentSchedulerQueueSize, "paymentScheduler");
     }
 }

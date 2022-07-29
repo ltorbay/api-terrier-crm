@@ -14,6 +14,14 @@ spring:
   mvc:
     converters:
       preferred-json-mapper: jackson
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: myemail@gmail.com
+    password: mypassword
+    properties.mail.smtp:
+      auth: true
+      starttls.enable: true
 logging:
   pattern:
     level: "%replace(xrid:%X{XRID} ){'xrid: ',''}%replace(xsid:%X{XSID} ){'xsid: ',''}%5p"
@@ -23,6 +31,9 @@ schedulers:
   datasource:
     pool-size: 100
     queue-task-cap: 500
+  payment:
+    pool-size: 10
+    queue-task-cap: 10
 
 cors:
   allowed-origins:
@@ -30,8 +41,20 @@ cors:
 admin.users:
   - login: user
     password: "$2a$12$BMfXJWpJvluMUy89bQuA1uV0YbNmiYdhasxNz3ahCEE4wIcoc8XOS"
-payments.square:
-  access-token: my-access-token
-  environment: SANDBOX
-  currency: EUR
+payments:
+  tva-percentage: 10
+  down-payment-ratio: 0.30
+  due-date-min-delay-days: 30
+  reminder-days: -7
+  reminder-message: 'Bonjour,\n
+    Merci d''avoir réservé votre séjour avec nous. \n
+    Vous recevez ce rappel pour réaliser le paiement final de votre réservation \n
+    \n 
+    A bientôt au Terrier ! \n
+  '
+  square:
+    access-token: my-access-token
+    environment: SANDBOX
+    currency: EUR
+    location-Id: LocationId
   

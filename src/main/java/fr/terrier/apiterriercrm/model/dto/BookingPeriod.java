@@ -27,6 +27,10 @@ public class BookingPeriod {
     }
 
     public Long consecutiveDays() {
-        return ChronoUnit.DAYS.between(start, end) + 1L;
+        return consecutiveNights() + 1L;
+    }
+    
+    public Long consecutiveNights() {
+        return ChronoUnit.DAYS.between(start, end);
     }
 }

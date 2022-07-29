@@ -11,7 +11,6 @@ public class BookingDetail {
     private Long id;
     private Long userId;
     private BookingStatus status;
-    private String idempotencyKey;
     private BookingType type;
     private BookingPeriod period;
     private BookingInformation information;
