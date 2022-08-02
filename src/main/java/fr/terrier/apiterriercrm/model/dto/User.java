@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
@@ -21,4 +22,12 @@ public class User {
     private String phoneNumber;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
+
+    public String prettyPrint(final DateTimeFormatter dateFormat) {
+        return String.format("""
+                                     %s %s %s
+                                     Contact : %s  %s""",
+                             firstName, lastName, birthDate != null ? "Né(e) le " + birthDate.format(dateFormat) : "",
+                             email, phoneNumber != null ? phoneNumber : "");
+    }
 }

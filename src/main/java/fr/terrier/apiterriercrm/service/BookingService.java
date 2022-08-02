@@ -38,13 +38,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class BookingService {
     private final CrmService crmService;
     private final UserService userService;
     private final PricingService pricingService;
+    private final NotificationService notificationService;
     private final BookingMapper bookingMapper;
     private final BookingPeriodMapper bookingPeriodMapper;
     private final BookedPeriodMapper bookedPeriodMapper;
@@ -117,6 +118,7 @@ public class BookingService {
                                                           .flatMap(bookingEntity -> crmService.createCard(bookingDetails, user)
                                                                                               .flatMap(card -> crmService.createInvoice(bookingDetails, card, user.getCrmId()))
                                                                                               .onErrorResume(e -> abortBooking(bookingEntity.getId()).then(Mono.error(new BookingException("Invoice generation failed", e))))
+                                                                                              .doOnNext(invoice -> notificationService.notifyBooking(bookingRequest, bookingDetails, invoice))
                                                                                               .flatMap(invoice -> completeBooking(bookingEntity.getId(), invoice.getId()).thenReturn(bookingEntity))))
                                      // TODO send discord notification for this type of errors
                                      .doOnError(e -> log.error("Error while performing booking completion", e))
@@ -152,7 +154,7 @@ public class BookingService {
                                            .subscribeOn(datasourceScheduler));
     }
 
-    private Mono<Boolean> completeBooking(@NonNull final Long bookingId, 
+    private Mono<Boolean> completeBooking(@NonNull final Long bookingId,
                                           @NonNull final String invoiceId) {
         // noinspection BlockingMethodInNonBlockingContext
         return Mono.fromCallable(() -> bookingRepository.persistBookingPayment(BookingStatus.PAID, invoiceId, bookingId))

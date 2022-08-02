@@ -3,10 +3,12 @@ package fr.terrier.apiterriercrm.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.terrier.apiterriercrm.model.enums.BookingType;
+import fr.terrier.apiterriercrm.model.enums.Locale;
 import fr.terrier.apiterriercrm.model.exception.InternalServerException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Getter
@@ -35,5 +37,12 @@ public class PricingDetail {
 
         return nightlyRate * (paidNights % NIGHTS_IN_FULL_WEEK)
                 + weeklyRate * (paidNights / NIGHTS_IN_FULL_WEEK);
+    }
+
+    public String prettyPrint(final DateTimeFormatter dateFormat) {
+        return String.format("Réservation %s - %s en %s - %s pour %s€",
+                             bookingPeriod.getStart().format(dateFormat), bookingPeriod.getEnd().format(dateFormat),
+                             periodConfiguration.getPeriodType().getLabel(Locale.FR), type.getLabel(Locale.FR),
+                             getTotalCents() / 100);
     }
 }

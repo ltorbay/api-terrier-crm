@@ -29,6 +29,7 @@ import fr.terrier.apiterriercrm.model.enums.Locale;
 import fr.terrier.apiterriercrm.model.exception.InternalServerException;
 import fr.terrier.apiterriercrm.properties.PaymentProperties;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -36,6 +37,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CrmService {
@@ -82,10 +84,11 @@ public class CrmService {
                                                                                 .build())
                                                .idempotencyKey(UUID.randomUUID().toString())
                                                .build())
-                        .map(CreateInvoiceResponse::getInvoice));
+                        .map(CreateInvoiceResponse::getInvoice))
+                .doOnNext(order -> log.info("Created order {} at {}", order.getId(), order.getCreatedAt()));
     }
 
-    private Mono<Order> createOrder(final BookingDetails bookingDetails, final String userCrmId) {
+    public Mono<Order> createOrder(final BookingDetails bookingDetails, final String userCrmId) {
         var tva = new OrderLineItemTax.Builder()
                 .uid(UUID.randomUUID().toString())
                 .name("TVA")
@@ -104,13 +107,14 @@ public class CrmService {
                                                             .build())
                                              .idempotencyKey(UUID.randomUUID().toString())
                                              .build())
-                        .map(CreateOrderResponse::getOrder);
+                        .map(CreateOrderResponse::getOrder)
+                        .doOnNext(order -> log.info("Created order {} at {}", order.getId(), order.getCreatedAt()));
     }
 
     private List<InvoicePaymentRequest> invoicePaymentRequests(final BookingDetails bookingDetails, final Card card) {
         var downPaymentMoney = money(bookingDetails.getDownPaymentAmount());
 
-        if (bookingDetails.getDownPaymentAmount() >= bookingDetails.getAmount()) {
+        if (!Boolean.TRUE.equals(bookingDetails.getDownPayment())) {
             return List.of(new InvoicePaymentRequest.Builder()
                                    .automaticPaymentSource(CARD_ON_FILE)
                                    .cardId(card.getId())
