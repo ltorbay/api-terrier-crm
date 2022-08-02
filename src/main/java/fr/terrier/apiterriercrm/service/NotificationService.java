@@ -45,22 +45,23 @@ public class NotificationService {
         lines.add("-----------------------------------------------------");
         lines.add("Nouvelle réservation effectuée ! On a plein de sous !");
         lines.add("");
-        
+
         // Booking details
         lines.add(String.format("Du %s au %s pour %s personnes",
                                 request.getPeriod().getStart().format(dateFormat),
                                 request.getPeriod().getEnd().format(dateFormat),
                                 request.getInformation().getGuestsCount()));
         lines.add("");
-        
+
         // Customer information
         lines.add(String.format("Client : %s", request.getUser().prettyPrint(dateFormat)));
+        lines.add("");
         if (StringUtils.isNotBlank(request.getInformation().getComment())) {
-            lines.add("");
             lines.add("Commentaire client :");
             lines.add(request.getInformation().getComment());
+            lines.add("");
         }
-        
+
         // Pricing
         details.getPricing().stream().map(detail -> detail.prettyPrint(dateFormat)).forEach(lines::add);
         lines.add(String.format("Total %s€", details.getAmount() / 100));
@@ -70,7 +71,7 @@ public class NotificationService {
             lines.add("Payé en totalité à la réservation");
         }
         lines.add("");
-        
+
         // CRM
         lines.add(String.format("facture n°%s, ID %s - Commande ID %s, ", invoice.getInvoiceNumber(), invoice.getId(), invoice.getOrderId()));
 
