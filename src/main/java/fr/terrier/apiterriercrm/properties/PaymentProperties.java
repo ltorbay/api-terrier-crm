@@ -14,6 +14,7 @@ public class PaymentProperties {
     private Square square;
     private Double tvaPercentage;
     private Double downPaymentRatio;
+    private Long cleaningFeeCents;
     private Integer dueDateMinDelayDays;
     private Integer reminderDays;
     private String reminderMessage;

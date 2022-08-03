@@ -15,11 +15,13 @@ import com.squareup.square.models.InvoiceAcceptedPaymentMethods;
 import com.squareup.square.models.InvoicePaymentReminder;
 import com.squareup.square.models.InvoicePaymentRequest;
 import com.squareup.square.models.InvoiceRecipient;
+import com.squareup.square.models.MeasurementUnit;
 import com.squareup.square.models.Money;
 import com.squareup.square.models.Order;
 import com.squareup.square.models.OrderLineItem;
 import com.squareup.square.models.OrderLineItemAppliedTax;
 import com.squareup.square.models.OrderLineItemTax;
+import com.squareup.square.models.OrderQuantityUnit;
 import fr.terrier.apiterriercrm.model.dto.BookingDetails;
 import fr.terrier.apiterriercrm.model.dto.BookingPeriod;
 import fr.terrier.apiterriercrm.model.dto.PricingDetail;
@@ -36,6 +38,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -100,10 +103,15 @@ public class CrmService {
                                              .order(new Order.Builder(paymentProperties.getSquare().getLocationId())
                                                             .taxes(List.of(tva))
                                                             .customerId(userCrmId)
-                                                            .lineItems(bookingDetails.getPricing()
-                                                                                     .stream()
-                                                                                     .map(detail -> orderLineItem(detail, tva.getUid()))
-                                                                                     .toList())
+                                                            .lineItems(Stream.concat(bookingDetails.getPricing()
+                                                                                                   .stream()
+                                                                                                   .map(detail -> orderLineItem(detail, tva.getUid())),
+                                                                                     Stream.of(new OrderLineItem.Builder("1")
+                                                                                                       .basePriceMoney(money(bookingDetails.getCleaningFeeCents()))
+                                                                                                       .name("Frais de ménage")
+                                                                                                       .appliedTaxes(List.of(new OrderLineItemAppliedTax(tva.getUid(), UUID.randomUUID().toString(), null)))
+                                                                                                       .build()))
+                                                                             .toList())
                                                             .build())
                                              .idempotencyKey(UUID.randomUUID().toString())
                                              .build())
@@ -158,6 +166,12 @@ public class CrmService {
                                                                                                          .getPeriodType()
                                                                                                          .getLabel(Locale.FR)))
                 .appliedTaxes(List.of(new OrderLineItemAppliedTax(taxUid, UUID.randomUUID().toString(), null)))
+                .quantityUnit(new OrderQuantityUnit.Builder()
+                                      .precision(0)
+                                      .measurementUnit(new MeasurementUnit.Builder()
+                                                               .timeUnit("GENERIC_DAY")
+                                                               .build())
+                                      .build())
                 .build();
     }
 

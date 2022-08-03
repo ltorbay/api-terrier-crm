@@ -44,6 +44,7 @@ admin.users:
 payments:
   tva-percentage: 10
   down-payment-ratio: 0.30
+  cleaning-fee-cents: 20000
   due-date-min-delay-days: 30
   reminder-days: -7
   reminder-message: 'Bonjour,\n

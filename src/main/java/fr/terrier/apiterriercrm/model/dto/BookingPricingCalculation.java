@@ -13,15 +13,18 @@ public class BookingPricingCalculation {
     @JsonProperty
     private List<PricingDetail> detail;
     @JsonProperty
+    private Long cleaningFeeCents;
+    @JsonProperty
     private Long totalCents;
     @JsonProperty
     private Long downPaymentTotalCents;
 
-    public BookingPricingCalculation(final List<PricingDetail> detail, final Double downPaymentRatio) {
+    public BookingPricingCalculation(final List<PricingDetail> detail, final Long cleaningFeeCents, final Double downPaymentRatio) {
         this.detail = detail;
+        this.cleaningFeeCents = cleaningFeeCents;
         this.totalCents = detail.stream()
                                 .mapToLong(PricingDetail::getTotalCents)
-                                .sum();
+                                .sum() + cleaningFeeCents;
         this.downPaymentTotalCents = ((Double) (totalCents * downPaymentRatio)).longValue();
     }
 

@@ -192,4 +192,10 @@
             insert into PeriodConfiguration (start, period_type, min_consecutive_days, pricing_both_nightly, pricing_grape_nightly, pricing_pear_nightly, pricing_both_weekly, pricing_grape_weekly, pricing_pear_weekly) values ('2025-01-04', 'OFF_SEASON', 3, 38000, 19000, 27000, 240000, 120000, 165000);
         </sql>
     </changeSet>
+    <changeSet id="202208031118" author="ltorbay">
+        <comment>Add cleaning_fee_cents column to Booking table</comment>
+        <addColumn tableName="Booking">
+            <column name="cleaning_fee_cents" type="bigint" defaultValueNumeric="0"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

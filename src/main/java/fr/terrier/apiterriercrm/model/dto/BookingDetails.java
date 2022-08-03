@@ -16,16 +16,14 @@ public class BookingDetails {
     @NonNull
     @Positive
     private Long amount;
-    
     @NonNull
     private List<PricingDetail> pricing;
-    
+    @NonNull
+    private Long cleaningFeeCents;
     @NotBlank
     private String sourceId;
-    
     @NonNull
     private Boolean downPayment;
-    
     @NonNull
     private Long downPaymentAmount;
 }

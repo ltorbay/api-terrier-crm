@@ -64,6 +64,7 @@ public class NotificationService {
 
         // Pricing
         details.getPricing().stream().map(detail -> detail.prettyPrint(dateFormat)).forEach(lines::add);
+        lines.add(String.format("Frais de ménage %s€", details.getCleaningFeeCents() / 100));
         lines.add(String.format("Total %s€", details.getAmount() / 100));
         if (Boolean.TRUE.equals(details.getDownPayment())) {
             lines.add(String.format("Avec acompte %s€", details.getDownPaymentAmount() / 100));
@@ -78,7 +79,7 @@ public class NotificationService {
         sendMessage(lines.toString());
     }
 
-    private void sendMessage(String content) {
+    public void sendMessage(String content) {
         var client = WebClient.create("https://discord.com/api/v9");
         var nonce = random.nextInt(1000000);
 
@@ -91,6 +92,7 @@ public class NotificationService {
               .toEntity(LoginResponse.class)
               .mapNotNull(ResponseEntity::getBody)
               .map(LoginResponse::getToken)
+              // TODO cache token
               .flatMap(token -> client.post()
                                       .uri(String.format("/channels/%s/messages", discordChannelId))
                                       .header("authorization", token)

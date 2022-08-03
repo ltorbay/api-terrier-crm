@@ -57,7 +57,7 @@ public class BookingService {
 
     public Mono<BookingPricingCalculation> getBookingPriceDetails(final BookingType type, final LocalDate start, LocalDate end) {
         return pricingService.getBookingPriceDetails(type, start, end)
-                             .map(details -> new BookingPricingCalculation(details, paymentProperties.getDownPaymentRatio()));
+                             .map(details -> new BookingPricingCalculation(details, paymentProperties.getCleaningFeeCents(), paymentProperties.getDownPaymentRatio()));
     }
 
     public Mono<BookingResponse> book(@Valid @RequestBody BookingRequest bookingRequest) {
@@ -70,7 +70,7 @@ public class BookingService {
 
         return pricingService.getBookingPriceDetails(bookingRequest.getType(), bookingRequest.getPeriod().getStart(), bookingRequest.getPeriod().getEnd())
                              .handle((List<PricingDetail> pricingDetails, SynchronousSink<BookingDetails> sink) -> {
-                                 var pricingCalculation = new BookingPricingCalculation(pricingDetails, paymentProperties.getDownPaymentRatio());
+                                 var pricingCalculation = new BookingPricingCalculation(pricingDetails, paymentProperties.getCleaningFeeCents(), paymentProperties.getDownPaymentRatio());
                                  if (Boolean.TRUE.equals(bookingRequest.getInformation().getDownPayment())) {
                                      if (!Objects.equals(pricingCalculation.getDownPaymentTotalCents(), bookingRequest.getInformation().getPaymentAmountCents())) {
                                          sink.error(new ResponseException(HttpStatus.BAD_REQUEST, "Calculated down payment amount %d and amount sent by client %d do not match",
@@ -91,6 +91,7 @@ public class BookingService {
                                                          .sourceId(bookingRequest.getInformation().getPaymentSourceId())
                                                          .amount(pricingCalculation.getTotalCents())
                                                          .pricing(pricingDetails)
+                                                         .cleaningFeeCents(pricingCalculation.getCleaningFeeCents())
                                                          .downPayment(bookingRequest.getInformation().getDownPayment())
                                                          .downPaymentAmount(pricingCalculation.getDownPaymentTotalCents())
                                                          .build());
@@ -108,6 +109,8 @@ public class BookingService {
                                                                                                                                .guestsCount(bookingRequest.getInformation().getGuestsCount())
                                                                                                                                .paymentAmountCents(bookingRequest.getInformation().getPaymentAmountCents())
                                                                                                                                .paymentSourceId(bookingRequest.getInformation().getPaymentSourceId())
+                                                                                                                               .downPayment(bookingRequest.getInformation().getDownPayment())
+                                                                                                                               .cleaningFeeCents(bookingRequest.getInformation().getCleaningFeeCents())
                                                                                                                                .build())
                                                                                           .type(bookingRequest.getType())
                                                                                           .userId(userEntity.getId())
@@ -120,8 +123,10 @@ public class BookingService {
                                                                                               .onErrorResume(e -> abortBooking(bookingEntity.getId()).then(Mono.error(new BookingException("Invoice generation failed", e))))
                                                                                               .doOnNext(invoice -> notificationService.notifyBooking(bookingRequest, bookingDetails, invoice))
                                                                                               .flatMap(invoice -> completeBooking(bookingEntity.getId(), invoice.getId()).thenReturn(bookingEntity))))
-                                     // TODO send discord notification for this type of errors
-                                     .doOnError(e -> log.error("Error while performing booking completion", e))
+                                     .doOnError(e -> {
+                                         log.error("Error while performing booking completion", e);
+                                         notificationService.sendMessage("Error while performing booking completion\n\n" + e.toString());
+                                     })
                                      .onErrorMap(e -> !(e instanceof ResponseException), e -> new BookingException("Error while performing booking completion", e))
                                      .map(bookingMapper::entityToResponse));
     }

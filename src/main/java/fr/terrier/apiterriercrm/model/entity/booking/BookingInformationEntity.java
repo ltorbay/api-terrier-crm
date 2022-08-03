@@ -1,6 +1,7 @@
 package fr.terrier.apiterriercrm.model.entity.booking;
 
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,4 +21,6 @@ public class BookingInformationEntity {
     private Long paymentAmountCents;
     @Positive
     private Boolean downPayment;
+    @PositiveOrZero
+    private Long cleaningFeeCents;
 }
