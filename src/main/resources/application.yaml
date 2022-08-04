@@ -57,7 +57,9 @@ payments:
     access-token: my-access-token
     environment: SANDBOX
     currency: EUR
-    location-Id: LocationId
+    location-id: LocationId
+notification:
+  email: leterrier-gites@gmail.com
 discord:
   client:
     login: discord-login

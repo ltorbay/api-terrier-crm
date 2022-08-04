@@ -125,7 +125,7 @@ public class BookingService {
                                                                                               .flatMap(invoice -> completeBooking(bookingEntity.getId(), invoice.getId()).thenReturn(bookingEntity))))
                                      .doOnError(e -> {
                                          log.error("Error while performing booking completion", e);
-                                         notificationService.sendMessage("Error while performing booking completion\n\n" + e.toString());
+                                         notificationService.sendMessage("Error while performing booking completion\n\n" + e.toString(), "Problème rencontré lors de la réservation");
                                      })
                                      .onErrorMap(e -> !(e instanceof ResponseException), e -> new BookingException("Error while performing booking completion", e))
                                      .map(bookingMapper::entityToResponse));

@@ -10,7 +10,7 @@
     </parent>
     <groupId>fr.terrier</groupId>
     <artifactId>api-terrier-crm</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <name>api-terrier-crm</name>
     <description>api-terrier-crm</description>
     <scm>
@@ -55,10 +55,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
         <dependency>

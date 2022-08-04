@@ -14,8 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
@@ -34,15 +37,20 @@ public class NotificationService {
     private String discordClientLogin;
     @Value("${discord.client.password}")
     private String discordClientPassword;
+
     @Value("${discord.client.channel-id}")
     private Long discordChannelId;
+
+    @Value("${notification.email}")
+    private String targetEmail;
+
+    private final JavaMailSender emailSender;
     private final Random random = new Random();
     private final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
     private final Scheduler notificationScheduler = Schedulers.newBoundedElastic(10, 20, "notificationScheduler");
 
     public void notifyBooking(final BookingRequest request, final BookingDetails details, final Invoice invoice) {
         final StringJoiner lines = new StringJoiner("\n");
-        lines.add("-----------------------------------------------------");
         lines.add("Nouvelle réservation effectuée ! On a plein de sous !");
         lines.add("");
 
@@ -76,40 +84,52 @@ public class NotificationService {
         // CRM
         lines.add(String.format("facture n°%s, ID %s - Commande ID %s, ", invoice.getInvoiceNumber(), invoice.getId(), invoice.getOrderId()));
 
-        sendMessage(lines.toString());
+        sendMessage(lines.toString(), String.format("Nouvelle réservation de %s %s", request.getUser().getFirstName(), request.getUser().getLastName()));
     }
 
-    public void sendMessage(String content) {
-        var client = WebClient.create("https://discord.com/api/v9");
-        var nonce = random.nextInt(1000000);
+    public void sendMessage(String content, String subject) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(targetEmail);
+        message.setTo(targetEmail);
+        message.setSubject(subject);
+        message.setText(content);
+        Mono.fromCallable(() -> {
+                emailSender.send(message);
+                return true;
+            })
+            .subscribeOn(notificationScheduler)
+            .timeout(Duration.ofMinutes(1))
+            .subscribe();
 
-        client.post()
-              .uri("/auth/login")
-              .contentType(MediaType.APPLICATION_JSON)
-              .bodyValue(Map.of("login", discordClientLogin,
-                                "password", discordClientPassword))
-              .retrieve()
-              .toEntity(LoginResponse.class)
-              .mapNotNull(ResponseEntity::getBody)
-              .map(LoginResponse::getToken)
-              // TODO cache token
-              .flatMap(token -> client.post()
-                                      .uri(String.format("/channels/%s/messages", discordChannelId))
-                                      .header("authorization", token)
-                                      .contentType(MediaType.APPLICATION_JSON)
-                                      .bodyValue(Map.of("content", content,
-                                                        "nonce", nonce,
-                                                        "tts", false))
-                                      .retrieve()
-                                      .toEntity(SendMessageResponse.class))
-              .doOnError(e -> log.warn("Unable to send discord notification", e))
-              .doOnNext(response -> Optional.ofNullable(response.getBody())
-                                            .map(SendMessageResponse::getNonce)
-                                            .ifPresentOrElse(n -> log.info("Successfully sent discord notification"),
-                                                             () -> log.warn("Discord answered empty or invalid nonce")))
-              .subscribeOn(notificationScheduler)
-              .timeout(Duration.ofMinutes(1))
-              .subscribe();
+//        var client = WebClient.create("https://discord.com/api/v9");
+//        var nonce = random.nextInt(1000000);
+//        client.post()
+//              .uri("/auth/login")
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .bodyValue(Map.of("login", discordClientLogin,
+//                                "password", discordClientPassword))
+//              .retrieve()
+//              .toEntity(LoginResponse.class)
+//              .mapNotNull(ResponseEntity::getBody)
+//              .map(LoginResponse::getToken)
+//              // TODO cache token
+//              .flatMap(token -> client.post()
+//                                      .uri(String.format("/channels/%s/messages", discordChannelId))
+//                                      .header("authorization", token)
+//                                      .contentType(MediaType.APPLICATION_JSON)
+//                                      .bodyValue(Map.of("content", content,
+//                                                        "nonce", nonce,
+//                                                        "tts", false))
+//                                      .retrieve()
+//                                      .toEntity(SendMessageResponse.class))
+//              .doOnError(e -> log.warn("Unable to send discord notification", e))
+//              .doOnNext(response -> Optional.ofNullable(response.getBody())
+//                                            .map(SendMessageResponse::getNonce)
+//                                            .ifPresentOrElse(n -> log.info("Successfully sent discord notification"),
+//                                                             () -> log.warn("Discord answered empty or invalid nonce")))
+//              .subscribeOn(notificationScheduler)
+//              .timeout(Duration.ofMinutes(1))
+//              .subscribe();
     }
 
     @Getter
