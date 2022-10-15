@@ -1,12 +1,11 @@
 package fr.terrier.apiterriercrm.model.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class BookingInformation extends BaseBookingInformation {
-    @NotBlank
+public class AdminBookingInformation extends BaseBookingInformation {
+    private String invoiceId;
     private String paymentSourceId;
 }

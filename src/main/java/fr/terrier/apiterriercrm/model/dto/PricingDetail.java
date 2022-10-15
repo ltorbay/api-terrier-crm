@@ -30,8 +30,16 @@ public class PricingDetail {
         var paidNights = bookingPeriod.consecutiveDays() - 1L;
         var weeklyOptional = Optional.ofNullable(periodConfiguration.getPricing().getWeeklyRate(type));
 
+        
         var nightlyRate = Optional.ofNullable(periodConfiguration.getPricing().getNightlyRate(type))
                                   .orElseGet(() -> weeklyOptional.map(weekly -> 100 * (weekly / (100 * NIGHTS_IN_FULL_WEEK)))
+                                                                 // FIXME thrown :
+                                                                 // fr.terrier.apiterriercrm.model.exception.InternalServerException: 500 INTERNAL_SERVER_ERROR "Missing expected nightly rate with type GRAPE for pricing calculation on detail fr.terrier.apiterriercrm.model.dto.PricingDetail@45dea8c7"
+                                                                 //	at fr.terrier.apiterriercrm.model.dto.PricingDetail.lambda$getTotalCents$1(PricingDetail.java:35) ~[classes!/:0.1.1]
+                                                                 //	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+                                                                 //Error has been observed at the following site(s):
+                                                                 //	*__checkpoint ⇢ Handler fr.terrier.apiterriercrm.controller.BookingController#prepareBooking(BookingType, LocalDate, LocalDate) [DispatcherHandler]
+                                                                 //	*__checkpoint ⇢ fr.terrier.apiterriercrm.configuration.LoggingFilter [DefaultWebFilterChain]
                                                                  .orElseThrow(() -> new InternalServerException("Missing expected nightly rate with type %s for pricing calculation on detail %s", type, this)));
         var weeklyRate = weeklyOptional.orElseGet(() -> nightlyRate * NIGHTS_IN_FULL_WEEK);
 

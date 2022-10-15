@@ -59,7 +59,7 @@ payments:
     currency: EUR
     location-id: LocationId
 notification:
-  email: leterrier-gites@gmail.com
+  email: leterrier.gites@gmail.com
 discord:
   client:
     login: discord-login

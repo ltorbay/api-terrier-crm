@@ -21,6 +21,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
@@ -49,7 +50,7 @@ public class NotificationService {
     private final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
     private final Scheduler notificationScheduler = Schedulers.newBoundedElastic(10, 20, "notificationScheduler");
 
-    public void notifyBooking(final BookingRequest request, final BookingDetails details, final Invoice invoice) {
+    public void notifyBooking(final BookingRequest<?> request, final BookingDetails details, Invoice invoice) {
         final StringJoiner lines = new StringJoiner("\n");
         lines.add("Nouvelle réservation effectuée ! On a plein de sous !");
         lines.add("");

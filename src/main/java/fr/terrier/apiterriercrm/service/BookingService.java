@@ -1,11 +1,15 @@
 package fr.terrier.apiterriercrm.service;
 
+import com.squareup.square.models.Invoice;
 import fr.terrier.apiterriercrm.mapper.BookedPeriodMapper;
 import fr.terrier.apiterriercrm.mapper.BookingMapper;
 import fr.terrier.apiterriercrm.mapper.BookingPeriodMapper;
+import fr.terrier.apiterriercrm.model.dto.AdminBookingInformation;
+import fr.terrier.apiterriercrm.model.dto.BaseBookingInformation;
 import fr.terrier.apiterriercrm.model.dto.BookedDates;
 import fr.terrier.apiterriercrm.model.dto.BookingDetail;
 import fr.terrier.apiterriercrm.model.dto.BookingDetails;
+import fr.terrier.apiterriercrm.model.dto.BookingInformation;
 import fr.terrier.apiterriercrm.model.dto.BookingPricingCalculation;
 import fr.terrier.apiterriercrm.model.dto.BookingRequest;
 import fr.terrier.apiterriercrm.model.dto.BookingResponse;
@@ -37,6 +41,7 @@ import reactor.core.scheduler.Scheduler;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -60,13 +65,22 @@ public class BookingService {
                              .map(details -> new BookingPricingCalculation(details, paymentProperties.getCleaningFeeCents(), paymentProperties.getDownPaymentRatio()));
     }
 
-    public Mono<BookingResponse> book(@Valid @RequestBody BookingRequest bookingRequest) {
+    public <T extends BaseBookingInformation> Mono<BookingResponse> book(@Valid @RequestBody BookingRequest<T> bookingRequest) {
         if (Boolean.TRUE.equals(bookingRequest.getInformation().getDownPayment())
                 && bookingRequest.getPeriod().getStart().isBefore(LocalDate.now().minusDays(paymentProperties.getDueDateMinDelayDays()))) {
             return Mono.error(() -> new BookingException("User requested down payment less than %s days before stay date (%s)",
                                                          paymentProperties.getDueDateMinDelayDays(),
                                                          bookingRequest.getPeriod().getStart().toString()));
         }
+
+        final var paymentSourceId = Optional.ofNullable(bookingRequest.getInformation())
+                                            .filter(BookingInformation.class::isInstance)
+                                            .map(BookingInformation.class::cast)
+                                            .map(BookingInformation::getPaymentSourceId);
+        final var invoiceId = Optional.ofNullable(bookingRequest.getInformation())
+                                      .filter(AdminBookingInformation.class::isInstance)
+                                      .map(AdminBookingInformation.class::cast)
+                                      .map(AdminBookingInformation::getInvoiceId);
 
         return pricingService.getBookingPriceDetails(bookingRequest.getType(), bookingRequest.getPeriod().getStart(), bookingRequest.getPeriod().getEnd())
                              .handle((List<PricingDetail> pricingDetails, SynchronousSink<BookingDetails> sink) -> {
@@ -88,7 +102,7 @@ public class BookingService {
                                  }
 
                                  sink.next(BookingDetails.builder()
-                                                         .sourceId(bookingRequest.getInformation().getPaymentSourceId())
+                                                         .sourceId(paymentSourceId.orElse(null))
                                                          .amount(pricingCalculation.getTotalCents())
                                                          .pricing(pricingDetails)
                                                          .cleaningFeeCents(pricingCalculation.getCleaningFeeCents())
@@ -108,7 +122,7 @@ public class BookingService {
                                                                                                                                .comment(bookingRequest.getInformation().getComment())
                                                                                                                                .guestsCount(bookingRequest.getInformation().getGuestsCount())
                                                                                                                                .paymentAmountCents(bookingRequest.getInformation().getPaymentAmountCents())
-                                                                                                                               .paymentSourceId(bookingRequest.getInformation().getPaymentSourceId())
+                                                                                                                               .paymentSourceId(paymentSourceId.orElse(null))
                                                                                                                                .downPayment(bookingRequest.getInformation().getDownPayment())
                                                                                                                                .cleaningFeeCents(bookingRequest.getInformation().getCleaningFeeCents())
                                                                                                                                .build())
@@ -118,11 +132,13 @@ public class BookingService {
                                                           .map(bookingRepository::save)
                                                           .flatMap(bookingEntity -> persistPricingDetails(bookingEntity, bookingDetails.getPricing()).thenReturn(bookingEntity))
                                                           .subscribeOn(datasourceScheduler)
-                                                          .flatMap(bookingEntity -> crmService.createCard(bookingDetails, user)
-                                                                                              .flatMap(card -> crmService.createInvoice(bookingDetails, card, user.getCrmId()))
-                                                                                              .onErrorResume(e -> abortBooking(bookingEntity.getId()).then(Mono.error(new BookingException("Invoice generation failed", e))))
-                                                                                              .doOnNext(invoice -> notificationService.notifyBooking(bookingRequest, bookingDetails, invoice))
-                                                                                              .flatMap(invoice -> completeBooking(bookingEntity.getId(), invoice.getId()).thenReturn(bookingEntity))))
+                                                          .flatMap(bookingEntity -> paymentSourceId.map(sourceId -> crmService.createCard(sourceId, user)
+                                                                                                                              .flatMap(card -> crmService.createInvoice(bookingDetails, card, user.getCrmId()))
+                                                                                                                              .onErrorResume(e -> abortBooking(bookingEntity.getId()).then(Mono.error(new BookingException("Invoice generation failed", e)))))
+                                                                                                   .orElseGet(() -> invoiceId.map(crmService::getInvoice)
+                                                                                                                             .orElse(Mono.just(new Invoice.Builder().build())))
+                                                                                                   .doOnNext(invoice -> notificationService.notifyBooking(bookingRequest, bookingDetails, invoice))
+                                                                                                   .flatMap(invoice -> completeBooking(bookingEntity.getId(), invoice.getId()).thenReturn(bookingEntity))))
                                      .doOnError(e -> {
                                          log.error("Error while performing booking completion", e);
                                          notificationService.sendMessage("Error while performing booking completion\n\n" + e.toString(), "Problème rencontré lors de la réservation");

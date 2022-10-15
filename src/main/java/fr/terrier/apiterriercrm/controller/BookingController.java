@@ -1,6 +1,7 @@
 package fr.terrier.apiterriercrm.controller;
 
 import fr.terrier.apiterriercrm.model.dto.BookedDates;
+import fr.terrier.apiterriercrm.model.dto.BookingInformation;
 import fr.terrier.apiterriercrm.model.dto.BookingPricingCalculation;
 import fr.terrier.apiterriercrm.model.dto.BookingRequest;
 import fr.terrier.apiterriercrm.model.dto.BookingResponse;
@@ -31,7 +32,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public Mono<BookingResponse> book(@Valid @RequestBody BookingRequest bookingRequest) {
+    public Mono<BookingResponse> book(@Valid @RequestBody BookingRequest<BookingInformation> bookingRequest) {
         return bookingService.book(bookingRequest);
     }
 

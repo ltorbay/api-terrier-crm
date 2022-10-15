@@ -10,6 +10,7 @@ import com.squareup.square.models.CreateInvoiceResponse;
 import com.squareup.square.models.CreateOrderRequest;
 import com.squareup.square.models.CreateOrderResponse;
 import com.squareup.square.models.Customer;
+import com.squareup.square.models.GetInvoiceResponse;
 import com.squareup.square.models.Invoice;
 import com.squareup.square.models.InvoiceAcceptedPaymentMethods;
 import com.squareup.square.models.InvoicePaymentReminder;
@@ -30,6 +31,7 @@ import fr.terrier.apiterriercrm.model.entity.UserEntity;
 import fr.terrier.apiterriercrm.model.enums.Locale;
 import fr.terrier.apiterriercrm.model.exception.InternalServerException;
 import fr.terrier.apiterriercrm.properties.PaymentProperties;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,9 +52,9 @@ public class CrmService {
     private final CrmClientProxy crmClient;
     private final PaymentProperties paymentProperties;
 
-    public Mono<Card> createCard(final BookingDetails bookingDetails, final UserEntity user) {
+    public Mono<Card> createCard(final String paymentSourceId, final UserEntity user) {
         return crmClient.createCard(new CreateCardRequest.Builder(UUID.randomUUID().toString(),
-                                                                  bookingDetails.getSourceId(),
+                                                                  paymentSourceId,
                                                                   new Card.Builder()
                                                                           .customerId(user.getCrmId())
                                                                           .cardholderName(user.getLastName())
@@ -89,6 +91,11 @@ public class CrmService {
                                                .build())
                         .map(CreateInvoiceResponse::getInvoice))
                 .doOnNext(order -> log.info("Created order {} at {}", order.getId(), order.getCreatedAt()));
+    }
+
+    public Mono<Invoice> getInvoice(@NonNull final String invoiceId) {
+        return crmClient.getInvoice(invoiceId)
+                        .map(GetInvoiceResponse::getInvoice);
     }
 
     public Mono<Order> createOrder(final BookingDetails bookingDetails, final String userCrmId) {

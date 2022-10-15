@@ -1,7 +1,10 @@
 package fr.terrier.apiterriercrm.mapper;
 
 import fr.terrier.apiterriercrm.configuration.CustomMapperConfiguration;
+import fr.terrier.apiterriercrm.model.dto.AdminBookingInformation;
+import fr.terrier.apiterriercrm.model.dto.BaseBookingInformation;
 import fr.terrier.apiterriercrm.model.dto.BookingDetail;
+import fr.terrier.apiterriercrm.model.dto.BookingInformation;
 import fr.terrier.apiterriercrm.model.dto.BookingRequest;
 import fr.terrier.apiterriercrm.model.dto.BookingResponse;
 import fr.terrier.apiterriercrm.model.entity.booking.BookingEntity;
@@ -17,5 +20,10 @@ public interface BookingMapper {
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "id", ignore = true)
-    BookingEntity entityToResponse(final BookingRequest request);
+    BookingEntity adminRequestToEntity(final BookingRequest<AdminBookingInformation> request);
+
+    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    BookingEntity requestToEntity(final BookingRequest<BookingInformation> request);
 }

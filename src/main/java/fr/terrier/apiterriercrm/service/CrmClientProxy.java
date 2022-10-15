@@ -14,6 +14,7 @@ import com.squareup.square.models.CreateOrderRequest;
 import com.squareup.square.models.CreateOrderResponse;
 import com.squareup.square.models.CreatePaymentRequest;
 import com.squareup.square.models.CreatePaymentResponse;
+import com.squareup.square.models.GetInvoiceResponse;
 import fr.terrier.apiterriercrm.model.exception.BookingException;
 import fr.terrier.apiterriercrm.model.exception.InternalServerException;
 import fr.terrier.apiterriercrm.model.exception.ResponseException;
@@ -40,18 +41,23 @@ public class CrmClientProxy {
     private final Scheduler paymentScheduler;
 
     public Mono<CreateCustomerResponse> createCustomer(final CreateCustomerRequest request) {
-        return proxyClient("customer",
+        return proxyClient("create customer",
                            () -> squareClient.getCustomersApi().createCustomerAsync(request));
     }
 
     public Mono<CreateOrderResponse> createOrder(final CreateOrderRequest request) {
-        return proxyClient("order",
+        return proxyClient("create order",
                            () -> squareClient.getOrdersApi().createOrderAsync(request));
     }
 
     public Mono<CreateInvoiceResponse> createInvoice(final CreateInvoiceRequest request) {
-        return proxyClient("invoice",
+        return proxyClient("create invoice",
                            () -> squareClient.getInvoicesApi().createInvoiceAsync(request));
+    }
+    
+    public Mono<GetInvoiceResponse> getInvoice(final String invoiceId) {
+        return proxyClient("get invoice",
+                           () -> squareClient.getInvoicesApi().getInvoiceAsync(invoiceId));
     }
 
     public Mono<CompletePaymentResponse> completePayment(final String paymentId, final CompletePaymentRequest request) {

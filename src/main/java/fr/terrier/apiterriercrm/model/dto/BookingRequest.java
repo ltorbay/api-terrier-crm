@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BookingRequest {
+public class BookingRequest<T extends BaseBookingInformation> {
     @NotNull
     private BookingType type;
     @Valid
@@ -19,5 +19,5 @@ public class BookingRequest {
     private User user;
     @Valid
     @NotNull
-    private BookingInformation information;
+    private T information;
 }
