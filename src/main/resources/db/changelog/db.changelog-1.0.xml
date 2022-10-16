@@ -1,0 +1,40 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+    <changeSet id="202210161726" author="lto">
+        <comment>Update period type HOLIDAYS to MID_SEASON and rise pear price</comment>
+        <update tableName="PeriodConfiguration">
+            <column name="min_consecutive_days" valueNumeric="3"/>
+            <column name="pricing_both_nightly" valueNumeric="50000"/>
+            <column name="pricing_grape_nightly" valueNumeric="25000"/>
+            <column name="pricing_pear_nightly" valueNumeric="40000"/>
+            <column name="pricing_both_weekly" valueNumeric="320000"/>
+            <column name="pricing_grape_weekly" valueNumeric="155000"/>
+            <column name="pricing_pear_weekly" valueNumeric="240000"/>
+            <column name="period_type" value="MID_SEASON"/>
+            <where>period_type = 'HOLIDAYS'</where>
+        </update>
+        <update tableName="BookingPricingDetail">
+            <column name="configuration_period_type" value="MID_SEASON"/>
+            <where>configuration_period_type = 'HOLIDAYS'</where>
+        </update>
+        <update tableName="PeriodConfiguration">
+            <column name="pricing_pear_nightly" valueNumeric="30000"/>
+            <column name="pricing_pear_weekly" valueNumeric="180000"/>
+            <where>period_type = 'OFF_SEASON' and start != '1970-01-01'</where>
+        </update>
+    </changeSet>
+    <changeSet id="202210161732" author="lto">
+        <comment>Update pricing with new mid-season prices</comment>
+        <sql>
+            insert into PeriodConfiguration (start, period_type, min_consecutive_days, pricing_both_nightly, pricing_grape_nightly, pricing_pear_nightly, pricing_both_weekly, pricing_grape_weekly, pricing_pear_weekly) values ('2023-05-01', 'MID_SEASON', 3, 50000, 25000, 40000, 320000, 155000, 240000);
+            insert into PeriodConfiguration (start, period_type, min_consecutive_days, pricing_both_nightly, pricing_grape_nightly, pricing_pear_nightly, pricing_both_weekly, pricing_grape_weekly, pricing_pear_weekly) values ('2023-09-02', 'MID_SEASON', 3, 50000, 25000, 40000, 320000, 155000, 240000);
+            update PeriodConfiguration set start = '2023-10-01' where period_type='OFF_SEASON' and start = '2023-09-02';
+            insert into PeriodConfiguration (start, period_type, min_consecutive_days, pricing_both_nightly, pricing_grape_nightly, pricing_pear_nightly, pricing_both_weekly, pricing_grape_weekly, pricing_pear_weekly) values ('2024-05-01', 'MID_SEASON', 3, 50000, 25000, 40000, 320000, 155000, 240000);
+            insert into PeriodConfiguration (start, period_type, min_consecutive_days, pricing_both_nightly, pricing_grape_nightly, pricing_pear_nightly, pricing_both_weekly, pricing_grape_weekly, pricing_pear_weekly) values ('2024-08-31', 'MID_SEASON', 3, 50000, 25000, 40000, 320000, 155000, 240000);
+            update PeriodConfiguration set start = '2024-10-01' where period_type='OFF_SEASON' and start = '2024-08-31';
+        </sql>
+    </changeSet>
+</databaseChangeLog>
