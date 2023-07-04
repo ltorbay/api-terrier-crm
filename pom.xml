@@ -10,7 +10,7 @@
     </parent>
     <groupId>fr.terrier</groupId>
     <artifactId>api-terrier-crm</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <name>api-terrier-crm</name>
     <description>api-terrier-crm</description>
     <scm>

@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 public class CalendarController {
     private final CalendarService calendarService;
 
-    @GetMapping(produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping(produces = "text/calendar")
     public Mono<String> getCalendar() {
         return calendarService.getCalendar()
                               .map(Biweekly::write)
