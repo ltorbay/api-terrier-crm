@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/public/calendar")
+@RequestMapping("/public/calendar.ics")
 @RequiredArgsConstructor
 public class CalendarController {
     private final CalendarService calendarService;
