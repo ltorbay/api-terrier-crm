@@ -37,4 +37,25 @@
             update PeriodConfiguration set start = '2024-10-01' where period_type='OFF_SEASON' and start = '2024-08-31';
         </sql>
     </changeSet>
+    <changeSet id="202408211005" author="lto">
+        <comment>Add pricing for the end of 2024 to the summer of 2026</comment>
+        <sql>
+            INSERT INTO terrier.PeriodConfiguration (period_type, start, min_consecutive_days, pricing_both_nightly,
+                                                     pricing_both_weekly)
+            VALUES ('MID_SEASON', '2024-09-01', 3, 58000, 290000),
+                   ('OFF_SEASON', '2024-10-01', 3, 47000, 235000),
+                   ('MID_SEASON', '2024-12-20', 3, 58000, 290000),
+                   ('OFF_SEASON', '2025-01-07', 3, 47000, 235000),
+                   ('MID_SEASON', '2025-04-04', 3, 58000, 290000),
+                   ('PEAK_SEASON', '2025-06-20', 3, 72000, 360000),
+                   ('PEAK_SEASON', '2025-07-05', 8, null, 360000),
+                   ('MID_SEASON', '2025-08-31', 3, 58000, 290000),
+                   ('OFF_SEASON', '2025-10-01', 3, 47000, 235000),
+                   ('MID_SEASON', '2025-12-19', 3, 58000, 290000),
+                   ('OFF_SEASON', '2026-01-06', 3, 47000, 235000),
+                   ('MID_SEASON', '2026-04-03', 3, 58000, 290000),
+                   ('PEAK_SEASON', '2026-06-19', 3, 72000, 360000),
+                   ('PEAK_SEASON', '2026-07-04', 8, null, 360000);
+        </sql>
+    </changeSet>
 </databaseChangeLog>
